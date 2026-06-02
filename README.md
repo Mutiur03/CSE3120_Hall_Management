@@ -92,10 +92,15 @@ The development command starts:
 
 - Laravel app server
 - Queue listener
-- Laravel Pail log viewer
 - Vite development server
 
 Stop all processes with `Ctrl+C`.
+
+On macOS or Linux with PHP `pcntl`, include Laravel Pail log viewer:
+
+```bash
+composer run dev:pail
+```
 
 ## Manual Setup
 
@@ -243,12 +248,24 @@ php artisan key:generate
 
 ### Frontend assets missing
 
+Error may mention `'vite' is not recognized as an internal or external command`. Install npm dependencies:
+
 Run:
 
 ```bash
 npm install
 npm run build
 ```
+
+### Pail fails on Windows
+
+Native Windows PHP does not provide the `pcntl` extension required by Laravel Pail. Use:
+
+```bash
+composer run dev
+```
+
+Use `composer run dev:pail` only on systems with PHP `pcntl`.
 
 ### Port 8000 already in use
 
