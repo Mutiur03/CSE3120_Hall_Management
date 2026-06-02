@@ -1,59 +1,259 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hall Management
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 12 hall-management application with a Vite frontend. This repository currently uses SQLite for local development, so no MySQL or PostgreSQL server is required.
 
-## About Laravel
+## Tech Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP `^8.2`
+- Laravel `^12.0`
+- SQLite with PHP `pdo_sqlite`
+- Node.js and npm
+- Vite `^7.0`
+- Tailwind CSS `^4.0`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Prerequisites
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Install these tools before setup:
 
-## Learning Laravel
+- [Git](https://git-scm.com/)
+- [PHP](https://www.php.net/downloads.php) `8.2` or newer
+- [Composer](https://getcomposer.org/download/)
+- [Node.js](https://nodejs.org/) with npm
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Confirm installations:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+git --version
+php --version
+composer --version
+node --version
+npm --version
+```
 
-## Laravel Sponsors
+Confirm PHP SQLite support:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+php -m
+```
 
-### Premium Partners
+The output must include `pdo_sqlite`. If it is missing, enable the `pdo_sqlite` extension in your active `php.ini`.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Fresh Clone Setup
 
-## Contributing
+### 1. Clone repository
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+git clone <repository-url>
+cd Hall_Management
+```
 
-## Code of Conduct
+Replace `<repository-url>` with this repository's Git URL.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 2. Create local SQLite database
 
-## Security Vulnerabilities
+The database file is intentionally ignored by Git. Create it before running migrations.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Windows PowerShell:
 
-## License
+```powershell
+New-Item -ItemType File -Path database/database.sqlite -Force
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+macOS or Linux:
+
+```bash
+touch database/database.sqlite
+```
+
+### 3. Run automated setup
+
+```bash
+composer run setup
+```
+
+This command:
+
+1. Installs Composer dependencies.
+2. Copies `.env.example` to `.env` when `.env` does not exist.
+3. Generates `APP_KEY`.
+4. Runs database migrations.
+5. Installs npm dependencies.
+6. Builds frontend assets.
+
+### 4. Start local development
+
+```bash
+composer run dev
+```
+
+Open [http://localhost:8000](http://localhost:8000).
+
+The development command starts:
+
+- Laravel app server
+- Queue listener
+- Laravel Pail log viewer
+- Vite development server
+
+Stop all processes with `Ctrl+C`.
+
+## Manual Setup
+
+Use these commands when you need to run each step separately:
+
+Windows PowerShell:
+
+```powershell
+composer install
+Copy-Item .env.example .env
+New-Item -ItemType File -Path database/database.sqlite -Force
+php artisan key:generate
+php artisan migrate
+npm install
+npm run build
+```
+
+macOS or Linux:
+
+```bash
+composer install
+cp .env.example .env
+touch database/database.sqlite
+php artisan key:generate
+php artisan migrate
+npm install
+npm run build
+```
+
+Then start development:
+
+```bash
+composer run dev
+```
+
+## Environment Configuration
+
+Local configuration lives in `.env`. Do not commit this file.
+
+Default local database settings from `.env.example`:
+
+```dotenv
+DB_CONNECTION=sqlite
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+```
+
+Database-backed sessions, queues, and cache work after migrations run.
+
+## Useful Commands
+
+Run tests:
+
+```bash
+composer run test
+```
+
+Run migrations:
+
+```bash
+php artisan migrate
+```
+
+Reset database and run migrations again:
+
+```bash
+php artisan migrate:fresh
+```
+
+Reset database and load seed data:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Build frontend assets:
+
+```bash
+npm run build
+```
+
+Run only Vite:
+
+```bash
+npm run dev
+```
+
+Clear Laravel caches:
+
+```bash
+php artisan optimize:clear
+```
+
+## Seed Data
+
+Run:
+
+```bash
+php artisan db:seed
+```
+
+Current seeder creates one development user:
+
+```text
+Name: Test User
+Email: test@example.com
+```
+
+## Project Structure
+
+```text
+app/                 Application code
+config/              Laravel configuration
+database/migrations/ Database schema
+database/seeders/    Development seed data
+resources/           Blade views, CSS, and JavaScript
+routes/              Web and console routes
+tests/               PHPUnit tests
+```
+
+## Troubleshooting
+
+### SQLite driver missing
+
+Error may mention `could not find driver`. Enable `pdo_sqlite` in `php.ini`, then restart your terminal or PHP service.
+
+### SQLite database file missing
+
+Error may mention `database/database.sqlite` does not exist. Create the file:
+
+```powershell
+New-Item -ItemType File -Path database/database.sqlite -Force
+```
+
+On macOS or Linux, use `touch database/database.sqlite`.
+
+### Application key missing
+
+Run:
+
+```bash
+php artisan key:generate
+```
+
+### Frontend assets missing
+
+Run:
+
+```bash
+npm install
+npm run build
+```
+
+### Port 8000 already in use
+
+Run Laravel on another port:
+
+```bash
+php artisan serve --port=8001
+```
