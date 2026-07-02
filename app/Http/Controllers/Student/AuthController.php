@@ -67,12 +67,26 @@ class AuthController extends Controller
         return redirect()->route('student.dashboard')->with('success', 'Password changed successfully.');
     }
 
-    public function logout(Request $request)
+      public function changePassword(Request $request)
     {
-        Auth::guard('student')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $validated = $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
 
-        return redirect()->route('student.login');
+        $student = auth('student')->user();
+
+        if (!Hash::check($validated['current_password'], $student->password)) {
+            return redirect()->back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+
+        $student->update([
+            'password' => Hash::make($validated['new_password']),
+            'password_changed' => true,
+        ]);
+
+        return redirect()->route('student.dashboard')->with('success', 'Password changed successfully.');
     }
 }
+
+
