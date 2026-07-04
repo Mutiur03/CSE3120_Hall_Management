@@ -14,9 +14,21 @@
         </p>
         <h1 class="text-2xl font-bold text-slate-800">Room {{ $room->room_no }}</h1>
     </div>
-    <a href="{{ route('admin.rooms.index') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-        Back to Rooms
-    </a>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('admin.rooms.edit', $room) }}" class="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium text-white">
+            Edit
+        </a>
+        <form action="{{ route('admin.rooms.destroy', $room) }}" method="POST" onsubmit="return confirm('Delete room {{ $room->room_no }}? This also removes its seats.');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="inline-flex items-center justify-center rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
+                Delete
+            </button>
+        </form>
+        <a href="{{ route('admin.rooms.index') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Back
+        </a>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

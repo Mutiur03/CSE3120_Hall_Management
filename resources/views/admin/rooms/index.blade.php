@@ -5,6 +5,9 @@
 @section('content')
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-slate-800">Rooms</h1>
+    <a href="{{ route('admin.rooms.create') }}" class="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium transition-colors">
+        New Room
+    </a>
 </div>
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -33,7 +36,15 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-right">
-                            <a href="{{ route('admin.rooms.show', $room) }}" class="text-blue-600 hover:text-blue-800 font-medium">View Details</a>
+                            <div class="flex items-center justify-end gap-3">
+                                <a href="{{ route('admin.rooms.show', $room) }}" class="text-blue-600 hover:text-blue-800 font-medium">View Details</a>
+                                <a href="{{ route('admin.rooms.edit', $room) }}" class="text-slate-600 hover:text-slate-900 font-medium">Edit</a>
+                                <form action="{{ route('admin.rooms.destroy', $room) }}" method="POST" onsubmit="return confirm('Delete room {{ $room->room_no }}? This also removes its seats.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty

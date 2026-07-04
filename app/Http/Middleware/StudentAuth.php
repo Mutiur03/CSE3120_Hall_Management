@@ -10,7 +10,7 @@ class StudentAuth
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth('student')->check()) {
+        if (! auth('student')->check()) {
             return redirect()->route('student.login');
         }
 

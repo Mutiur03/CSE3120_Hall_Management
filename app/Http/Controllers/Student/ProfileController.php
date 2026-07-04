@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -13,6 +12,7 @@ class ProfileController extends Controller
     {
         $student = auth('student')->user();
         $student->load(['currentAllocation.seat.room', 'seatApplications', 'roomChangeRequests']);
+
         return view('student.profile.show', compact('student'));
     }
 
@@ -25,7 +25,7 @@ class ProfileController extends Controller
 
         $student = auth('student')->user();
 
-        if (!Hash::check($validated['current_password'], $student->password)) {
+        if (! Hash::check($validated['current_password'], $student->password)) {
             return redirect()->back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 

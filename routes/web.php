@@ -25,7 +25,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
+    Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
     Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
+    Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+    Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
+    Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {
@@ -41,12 +46,4 @@ Route::middleware('guest')->prefix('student')->name('student.')->group(function 
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [StudentAuthController::class, 'logout'])->name('logout');
-});
-Route::middleware('student.auth')->prefix('student')->name('student.')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\Student\AuthController::class, 'logout'])->name('logout');
-    
-    Route::get('/room-changes', [App\Http\Controllers\Student\RoomChangeController::class, 'index'])->name('room-changes.index');
-    Route::get('/room-changes/create', [App\Http\Controllers\Student\RoomChangeController::class, 'create'])->name('room-changes.create');
-    Route::post('/room-changes', [App\Http\Controllers\Student\RoomChangeController::class, 'store'])->name('room-changes.store');
-
 });

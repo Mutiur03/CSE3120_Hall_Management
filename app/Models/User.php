@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
