@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Student\AuthController as StudentAuthController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\PasswordResetController;
@@ -22,6 +23,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/change-password', [AdminAuthController::class, 'changePasswordForm'])->name('change-password');
     Route::post('/change-password', [AdminAuthController::class, 'changePassword']);
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {
