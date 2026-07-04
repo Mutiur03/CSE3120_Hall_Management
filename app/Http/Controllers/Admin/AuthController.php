@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Student;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class AuthController extends Controller
 {
     public function showLoginForm(): View
     {
-        return view('student.auth.login');
+        return view('admin.auth.login');
     }
 
     public function login(Request $request): RedirectResponse
@@ -30,7 +31,7 @@ class AuthController extends Controller
                 ->withInput($request->except('password'));
         }
 
-        if (! Auth::user()->isStudent()) {
+        if (! Auth::user()->isAdmin()) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -42,7 +43,32 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('student.dashboard'));
+        return redirect()->intended(route('admin.dashboard'));
+    }
+
+    public function changePasswordForm(): View
+    {
+        return view('admin.auth.change-password');
+    }
+
+    public function changePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'current_password' => ['required'],
+            'new_password' => ['required', 'min:6', 'confirmed'],
+        ]);
+
+        $user = Auth::user();
+
+        if (! Hash::check($validated['current_password'], $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+
+        $user->update([
+            'password' => Hash::make($validated['new_password']),
+        ]);
+
+        return redirect()->route('admin.dashboard')->with('success', 'Password changed successfully.');
     }
 
     public function logout(Request $request): RedirectResponse
@@ -51,6 +77,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('student.login');
+        return redirect()->route('login');
     }
 }
