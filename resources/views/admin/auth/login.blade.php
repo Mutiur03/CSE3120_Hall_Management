@@ -55,5 +55,9 @@
             Login
         </button>
     </form>
+
+    <div class="mt-4 text-center text-sm">
+        <a href="{{ route('student.login') }}" class="text-blue-600 hover:text-blue-700">Student Login</a>
+    </div>
 </div>
 @endsection
