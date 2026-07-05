@@ -73,6 +73,7 @@ class PasswordResetController extends Controller
             function (User $user, string $password): void {
                 $user->forceFill([
                     'password' => Hash::make($password),
+                    'is_first_login' => false,
                 ])->save();
             }
         );

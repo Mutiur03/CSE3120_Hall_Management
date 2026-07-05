@@ -32,6 +32,8 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'role' => UserRole::Student,
+            'is_first_login' => false,
+            'is_active' => true,
         ];
     }
 
@@ -39,6 +41,8 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => UserRole::Admin,
+            'is_first_login' => false,
+            'is_active' => true,
         ]);
     }
 
@@ -46,6 +50,15 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => UserRole::Student,
+            'is_first_login' => true,
+            'is_active' => true,
+        ]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
         ]);
     }
 

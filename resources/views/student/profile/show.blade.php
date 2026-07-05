@@ -1,42 +1,73 @@
 @extends('layouts.student')
 
-@section('title', 'My Profile')
+@section('title', 'My Profile | Hall Management System')
 
 @section('content')
-<div class="row">
-    <div class="col-lg-4">
-        <div class="card text-center">
-            <div class="card-body">
-                @if($student->photo)
-                    <img src="{{ asset('storage/' . $student->photo) }}" alt="" class="rounded-circle mb-3" width="120" height="120">
-                @else
-                    <div class="avatar-placeholder mx-auto mb-3" style="width:120px;height:120px;font-size:48px;line-height:120px;background:#2563eb;color:#fff;border-radius:50%;">
-                        {{ strtoupper(substr($student->name, 0, 1)) }}
-                    </div>
-                @endif
-                <h4>{{ $student->name }}</h4>
-                <p class="text-muted">{{ $student->student_id }}</p>
-                <span class="badge bg-{{ $student->status === 'active' ? 'success' : 'warning' }}">{{ ucfirst($student->status) }}</span>
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+        <p class="text-sm text-slate-500 mb-1">
+            <a href="{{ route('student.dashboard') }}" class="hover:text-slate-700">Dashboard</a>
+            <span class="mx-1">/</span>
+            <span>My Profile</span>
+        </p>
+        <h1 class="text-2xl font-bold text-slate-800">My Profile</h1>
+    </div>
+    <a href="{{ route('student.profile.edit') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+        Update Contact
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div class="p-6 text-center">
+            <div class="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-blue-600 text-4xl font-semibold text-white">
+                {{ strtoupper(substr($user->name, 0, 1)) }}
             </div>
+            <h2 class="text-xl font-semibold text-slate-800">{{ $user->name }}</h2>
+            <p class="text-sm text-slate-500 mt-1">Roll: {{ $student->roll }}</p>
+            <span class="inline-flex mt-3 rounded-full px-3 py-1 text-xs font-medium {{ $student->status->value === 'active' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                {{ ucfirst($student->status->value) }}
+            </span>
         </div>
     </div>
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header"><h5>Personal Information</h5></div>
-            <div class="card-body">
-                <table class="table table-borderless">
-                    <tr><th width="30%">Department</th><td>{{ $student->department }}</td></tr>
-                    <tr><th>Session</th><td>{{ $student->session }}</td></tr>
-                    <tr><th>Batch</th><td>{{ $student->batch }}</td></tr>
-                    <tr><th>Gender</th><td>{{ ucfirst($student->gender) }}</td></tr>
-                    <tr><th>Blood Group</th><td>{{ $student->blood_group ?? 'N/A' }}</td></tr>
-                    <tr><th>Phone</th><td>{{ $student->phone ?? 'N/A' }}</td></tr>
-                    <tr><th>Email</th><td>{{ $student->email }}</td></tr>
-                    <tr><th>Address</th><td>{{ $student->address ?? 'N/A' }}</td></tr>
-                    <tr><th>Guardian Name</th><td>{{ $student->guardian_name ?? 'N/A' }}</td></tr>
-                    <tr><th>Guardian Phone</th><td>{{ $student->guardian_phone ?? 'N/A' }}</td></tr>
-                </table>
-            </div>
+
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200">
+        <div class="px-5 py-4 border-b border-slate-200">
+            <h2 class="font-semibold text-slate-800">Personal Information</h2>
+        </div>
+        <div class="p-5">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                <div>
+                    <dt class="text-slate-500">Registration Number</dt>
+                    <dd class="font-medium text-slate-800 mt-1">{{ $student->registration_no }}</dd>
+                </div>
+                <div>
+                    <dt class="text-slate-500">Department</dt>
+                    <dd class="font-medium text-slate-800 mt-1">{{ $student->department }}</dd>
+                </div>
+                <div>
+                    <dt class="text-slate-500">Academic Session</dt>
+                    <dd class="font-medium text-slate-800 mt-1">{{ $student->academic_session }}</dd>
+                </div>
+                <div>
+                    <dt class="text-slate-500">Phone</dt>
+                    <dd class="font-medium text-slate-800 mt-1">{{ $student->phone }}</dd>
+                </div>
+                <div>
+                    <dt class="text-slate-500">Email</dt>
+                    <dd class="font-medium text-slate-800 mt-1">{{ $user->email }}</dd>
+                </div>
+                <div>
+                    <dt class="text-slate-500">Current Seat</dt>
+                    <dd class="font-medium text-slate-800 mt-1">
+                        @if($student->currentAllocation)
+                            Room {{ $student->currentAllocation->seat->room->room_no }}, Seat {{ $student->currentAllocation->seat->seat_no }}
+                        @else
+                            Not allocated
+                        @endif
+                    </dd>
+                </div>
+            </dl>
         </div>
     </div>
 </div>
