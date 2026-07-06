@@ -16,7 +16,10 @@
 
 <div class="card">
     <div class="card-body">
-       
+        <form method="GET" class="row g-3 mb-4">
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control" placeholder="Search by ID, name, dept..." value="{{ request('search') }}">
+            </div>
             <div class="col-md-2">
                 <select name="department" class="form-select">
                     <option value="">All Departments</option>
@@ -90,11 +93,23 @@
                             <div class="btn-group">
                                 <a href="{{ route('admin.students.show', $student) }}" class="btn btn-sm btn-info" title="View">
                                     <i class="fas fa-eye"></i>
-                                    </a>
-          
+                                </a>
+                                <a href="{{ route('admin.students.edit', $student) }}" class="btn btn-sm btn-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ route('admin.students.destroy', $student) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Deactivate">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     @empty
+                    <tr><td colspan="9" class="text-center py-4">No students found</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
