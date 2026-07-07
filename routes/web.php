@@ -35,6 +35,8 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
     Route::get('/students', [AdminStudentController::class, 'index'])->name('students.index');
+    Route::get('/seats/available', [App\Http\Controllers\Admin\SeatController::class, 'available'])->name('seats.available');
+
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {
