@@ -28,6 +28,7 @@
                     @endforeach
                 </select>
             </div>
+
             <div class="col-md-2">
                 <select name="session" class="form-select">
                     <option value="">All Sessions</option>
@@ -104,6 +105,7 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
+                                
                             </div>
                         </td>
                     </tr>
