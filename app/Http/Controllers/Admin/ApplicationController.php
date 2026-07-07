@@ -4,22 +4,27 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SeatApplication;
-use App\Models\Seat;
-use App\Models\SeatAllocation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class ApplicationController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $query = SeatApplication::with('student');
+        $query = SeatApplication::with(['student.user', 'preferredRoom']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status'));
+        }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('student', function ($q) use ($search) {
-                $q->where('student_id', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
+            $search = $request->string('search');
+            $query->whereHas('student', function ($studentQuery) use ($search) {
+                $studentQuery
+                    ->where('roll', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
