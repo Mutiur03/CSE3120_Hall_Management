@@ -14,6 +14,8 @@
     </a>
 </div>
 
+<div class="card">
+    <div class="card-body">
 
             <div class="col-md-2">
                 <select name="session" class="form-select">
@@ -42,7 +44,7 @@
             <div class="col-md-1">
                 <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-filter"></i></button>
             </div>
-        </form>
+
 
         <div class="table-responsive">
             <table class="table table-hover">
@@ -84,7 +86,13 @@
                                 <a href="{{ route('admin.students.edit', $student) }}" class="btn btn-sm btn-warning" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                
+                                <form action="{{ route('admin.students.destroy', $student) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Deactivate">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
