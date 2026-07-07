@@ -56,7 +56,7 @@
             <div class="col-md-1">
                 <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-filter"></i></button>
             </div>
-        </form>
+
 
         <div class="table-responsive">
             <table class="table table-hover">
