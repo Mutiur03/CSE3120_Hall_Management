@@ -14,17 +14,7 @@
     </a>
 </div>
 
-<div class="card">
-    <div class="card-body">
-       
-            <div class="col-md-2">
-                <select name="department" class="form-select">
-                    <option value="">All Departments</option>
-                    @foreach($departments as $dept)
-                        <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                    @endforeach
-                </select>
-            </div>
+
             <div class="col-md-2">
                 <select name="session" class="form-select">
                     <option value="">All Sessions</option>
@@ -90,11 +80,17 @@
                             <div class="btn-group">
                                 <a href="{{ route('admin.students.show', $student) }}" class="btn btn-sm btn-info" title="View">
                                     <i class="fas fa-eye"></i>
-                                    </a>
-          
+                                </a>
+                                <a href="{{ route('admin.students.edit', $student) }}" class="btn btn-sm btn-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                
+                            </div>
                         </td>
                     </tr>
                     @empty
+                    <tr><td colspan="9" class="text-center py-4">No students found</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
