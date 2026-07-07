@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\SeatApplicationStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ApproveSeatApplicationRequest;
 use App\Models\SeatApplication;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -31,5 +34,23 @@ class ApplicationController extends Controller
         $applications = $query->latest()->paginate(20)->withQueryString();
 
         return view('admin.applications.index', compact('applications'));
+    }
+
+    public function approve(ApproveSeatApplicationRequest $request, SeatApplication $application): RedirectResponse
+    {
+        if (! $application->isPending()) {
+            return redirect()->back()->with('error', 'Application is not pending.');
+        }
+
+        $application->update([
+            'status' => SeatApplicationStatus::Approved,
+            'admin_comment' => $request->validated('admin_comment'),
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('admin.applications.index')
+            ->with('success', 'Application approved.');
     }
 }

@@ -40,6 +40,7 @@
                     <th class="px-4 py-3 text-left font-medium text-slate-600">Reason</th>
                     <th class="px-4 py-3 text-left font-medium text-slate-600">Status</th>
                     <th class="px-4 py-3 text-left font-medium text-slate-600">Date</th>
+                    <th class="px-4 py-3 text-right font-medium text-slate-600">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
@@ -71,10 +72,22 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-slate-600">{{ $application->created_at->format('M d, Y') }}</td>
+                        <td class="px-4 py-3 text-right">
+                            @if ($application->isPending())
+                                <form action="{{ route('admin.applications.approve', $application) }}" method="POST" class="inline" onsubmit="return confirm('Approve this application?');">
+                                    @csrf
+                                    <button type="submit" class="rounded-lg bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-xs font-medium">
+                                        Approve
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-slate-400">—</span>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-slate-500">No applications found.</td>
+                        <td colspan="8" class="px-4 py-8 text-center text-slate-500">No applications found.</td>
                     </tr>
                 @endforelse
             </tbody>

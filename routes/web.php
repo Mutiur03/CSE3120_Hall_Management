@@ -39,6 +39,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::get('/seats/available', [SeatController::class, 'available'])->name('seats.available');
 
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
+    Route::post('/applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {

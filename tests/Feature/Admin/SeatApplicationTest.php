@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\SeatApplicationStatus;
 use App\Models\SeatApplication;
 use App\Models\Student;
 use App\Models\User;
@@ -39,5 +40,48 @@ class SeatApplicationTest extends TestCase
         $response->assertSee('Seat Applications');
         $response->assertSee('Urgent request');
         $response->assertSee((string) $application->id);
+    }
+
+    public function test_admin_can_approve_pending_application(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $application = SeatApplication::factory()->create([
+            'status' => SeatApplicationStatus::Pending,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.applications.approve', $application));
+
+        $response->assertRedirect(route('admin.applications.index'));
+        $response->assertSessionHas('success');
+
+        $application->refresh();
+        $this->assertSame(SeatApplicationStatus::Approved, $application->status);
+        $this->assertSame($admin->id, $application->reviewed_by);
+        $this->assertNotNull($application->reviewed_at);
+    }
+
+    public function test_admin_cannot_approve_non_pending_application(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $application = SeatApplication::factory()->approved()->create([
+            'reviewed_by' => $admin->id,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.applications.approve', $application));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        $this->assertSame(SeatApplicationStatus::Approved, $application->fresh()->status);
+    }
+
+    public function test_student_cannot_approve_application(): void
+    {
+        $student = Student::factory()->create();
+        $application = SeatApplication::factory()->create();
+
+        $response = $this->actingAs($student->user)->post(route('admin.applications.approve', $application));
+
+        $response->assertForbidden();
+        $this->assertSame(SeatApplicationStatus::Pending, $application->fresh()->status);
     }
 }
