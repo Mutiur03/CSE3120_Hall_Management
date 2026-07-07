@@ -31,6 +31,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
     Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+
+    Route::get('/seats/available', [App\Http\Controllers\Admin\SeatController::class, 'available'])->name('seats.available');
+
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {
