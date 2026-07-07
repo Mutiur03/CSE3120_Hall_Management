@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\SeatApplicationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ApproveSeatApplicationRequest;
+use App\Http\Requests\Admin\RejectSeatApplicationRequest;
 use App\Models\SeatApplication;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,5 +53,23 @@ class ApplicationController extends Controller
         return redirect()
             ->route('admin.applications.index')
             ->with('success', 'Application approved.');
+    }
+
+    public function reject(RejectSeatApplicationRequest $request, SeatApplication $application): RedirectResponse
+    {
+        if (! $application->isPending()) {
+            return redirect()->back()->with('error', 'Application is not pending.');
+        }
+
+        $application->update([
+            'status' => SeatApplicationStatus::Rejected,
+            'admin_comment' => $request->validated('admin_comment'),
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('admin.applications.index')
+            ->with('success', 'Application rejected.');
     }
 }

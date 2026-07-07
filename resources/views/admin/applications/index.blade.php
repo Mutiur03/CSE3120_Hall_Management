@@ -74,12 +74,27 @@
                         <td class="px-4 py-3 text-slate-600">{{ $application->created_at->format('M d, Y') }}</td>
                         <td class="px-4 py-3 text-right">
                             @if ($application->isPending())
-                                <form action="{{ route('admin.applications.approve', $application) }}" method="POST" class="inline" onsubmit="return confirm('Approve this application?');">
-                                    @csrf
-                                    <button type="submit" class="rounded-lg bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-xs font-medium">
-                                        Approve
-                                    </button>
-                                </form>
+                                <div class="flex flex-col items-end gap-2">
+                                    <form action="{{ route('admin.applications.approve', $application) }}" method="POST" class="inline" onsubmit="return confirm('Approve this application?');">
+                                        @csrf
+                                        <button type="submit" class="rounded-lg bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-xs font-medium">
+                                            Approve
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.applications.reject', $application) }}" method="POST" class="inline-flex items-center gap-2">
+                                        @csrf
+                                        <input
+                                            type="text"
+                                            name="admin_comment"
+                                            required
+                                            placeholder="Rejection reason"
+                                            class="w-40 rounded-lg border border-slate-300 px-2 py-1.5 text-xs"
+                                        >
+                                        <button type="submit" class="rounded-lg bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 text-xs font-medium">
+                                            Reject
+                                        </button>
+                                    </form>
+                                </div>
                             @else
                                 <span class="text-slate-400">—</span>
                             @endif
