@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_first_login',
+        'is_active',
     ];
 
     /**
@@ -40,6 +43,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'is_first_login' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -51,5 +56,15 @@ class User extends Authenticatable
     public function isStudent(): bool
     {
         return $this->role === UserRole::Student;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->is_active;
+    }
+
+    public function student(): HasOne
+    {
+        return $this->hasOne(Student::class);
     }
 }

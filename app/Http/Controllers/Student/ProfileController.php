@@ -3,37 +3,44 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\Student\UpdateStudentContactRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function show()
+    public function show(): View
     {
-        $student = auth('student')->user();
-        $student->load(['currentAllocation.seat.room', 'seatApplications', 'roomChangeRequests']);
+        $user = auth()->user();
+        $student = $user->student;
 
-        return view('student.profile.show', compact('student'));
+        abort_if($student === null, 404);
+
+        $student->load(['currentAllocation.seat.room']);
+
+        return view('student.profile.show', compact('user', 'student'));
     }
 
-    public function changePassword(Request $request)
+    public function edit(): View
     {
-        $validated = $request->validate([
-            'current_password' => 'required',
-            'new_password' => 'required|min:6|confirmed',
-        ]);
+        $user = auth()->user();
+        $student = $user->student;
 
-        $student = auth('student')->user();
+        abort_if($student === null, 404);
 
-        if (! Hash::check($validated['current_password'], $student->password)) {
-            return redirect()->back()->withErrors(['current_password' => 'Current password is incorrect.']);
-        }
+        return view('student.profile.edit', compact('user', 'student'));
+    }
 
-        $student->update([
-            'password' => Hash::make($validated['new_password']),
-            'password_changed' => true,
-        ]);
+    public function update(UpdateStudentContactRequest $request): RedirectResponse
+    {
+        $student = auth()->user()->student;
 
-        return redirect()->route('student.dashboard')->with('success', 'Password changed successfully.');
+        abort_if($student === null, 404);
+
+        $student->update($request->validated());
+
+        return redirect()
+            ->route('student.profile')
+            ->with('success', 'Contact information updated successfully.');
     }
 }

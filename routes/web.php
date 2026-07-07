@@ -3,9 +3,11 @@
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Student\AuthController as StudentAuthController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\PasswordResetController;
+use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,12 +19,13 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AdminAuthController::class, 'login']);
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/change-password', [AdminAuthController::class, 'changePasswordForm'])->name('change-password');
     Route::post('/change-password', [AdminAuthController::class, 'changePassword']);
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
 
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
@@ -31,6 +34,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
     Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+    Route::get('/students', [AdminStudentController::class, 'index'])->name('students.index');
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {
@@ -43,7 +47,15 @@ Route::middleware('guest')->prefix('student')->name('student.')->group(function 
     Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
-    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth', 'active', 'role:student'])->prefix('student')->name('student.')->group(function () {
+    Route::get('/change-password', [StudentAuthController::class, 'changePasswordForm'])->name('change-password');
+    Route::post('/change-password', [StudentAuthController::class, 'changePassword']);
     Route::post('/logout', [StudentAuthController::class, 'logout'])->name('logout');
+
+    Route::middleware('student.password-changed')->group(function () {
+        Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/profile', [StudentProfileController::class, 'show'])->name('profile');
+        Route::get('/profile/edit', [StudentProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [StudentProfileController::class, 'update'])->name('profile.update');
+    });
 });
