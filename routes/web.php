@@ -33,6 +33,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
 
     Route::get('/seats/available', [App\Http\Controllers\Admin\SeatController::class, 'available'])->name('seats.available');
+    Route::get('/seats/occupied', [App\Http\Controllers\Admin\SeatController::class, 'occupied'])->name('seats.occupied');
 
 });
 
