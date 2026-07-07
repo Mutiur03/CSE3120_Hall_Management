@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Student\AuthController as StudentAuthController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\PasswordResetController;
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
     Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+    Route::get('/students', [AdminStudentController::class, 'index'])->name('students.index');
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {
