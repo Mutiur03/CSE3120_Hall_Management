@@ -15,9 +15,30 @@
 <div class="card">
     <div class="card-body">
         <form method="GET" class="row g-3 mb-4">
-            
-            
-            
+            <div class="col-md-3">
+                <select name="building" class="form-select">
+                    <option value="">All Buildings</option>
+                    @foreach($buildings as $b)
+                        <option value="{{ $b }}" {{ request('building') == $b ? 'selected' : '' }}>{{ $b }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="floor" class="form-select">
+                    <option value="">All Floors</option>
+                    @foreach($floors as $f)
+                        <option value="{{ $f }}" {{ request('floor') == $f ? 'selected' : '' }}>Floor {{ $f }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="room_id" class="form-select">
+                    <option value="">All Rooms</option>
+                    @foreach($rooms as $r)
+                        <option value="{{ $r->id }}" {{ request('room_id') == $r->id ? 'selected' : '' }}>{{ $r->room_number }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-md-2">
                 <select name="status" class="form-select">
                     <option value="">All Status</option>
@@ -26,7 +47,9 @@
                     <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
                 </select>
             </div>
-            
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-filter"></i></button>
+            </div>
         </form>
 
         <div class="table-responsive">
