@@ -1,76 +1,66 @@
 @extends('layouts.admin')
 
-@section('title', 'Available Seats')
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
-    <li class="breadcrumb-item"><a href="{{ route('admin.seats.index') }}">Seats</a></li>
-    <li class="breadcrumb-item active">Available</li>
-@endsection
+@section('title', 'Available Seats | Hall Management System')
 
 @section('content')
-<div class="page-header">
-    <h1><i class="fas fa-circle text-success me-2"></i>Available Seats</h1>
-    <a href="{{ route('admin.seats.allocate-form') }}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Allocate Seat</a>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <h1 class="text-2xl font-bold text-slate-800">Available Seats</h1>
+    <a href="{{ route('admin.seats.allocate-form') }}" class="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium">
+        Allocate Seat
+    </a>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <form method="GET" class="row g-3 mb-4">
-            <div class="col-md-4">
-                <select name="building" class="form-select">
-                    <option value="">All Buildings</option>
-                    @foreach($buildings as $b)
-                        <option value="{{ $b }}" {{ request('building') == $b ? 'selected' : '' }}>{{ $b }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-4">
-                <select name="floor" class="form-select">
-                    <option value="">All Floors</option>
-                    @foreach($floors as $f)
-                        <option value="{{ $f }}" {{ request('floor') == $f ? 'selected' : '' }}>Floor {{ $f }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-filter"></i></button>
-            </div>
-        </form>
+<form method="GET" class="mb-4 flex gap-3">
+    <select name="floor" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <option value="">All Floors</option>
+        @foreach ($floors as $floor)
+            <option value="{{ $floor }}" @selected(request('floor') == $floor)>Floor {{ $floor }}</option>
+        @endforeach
+    </select>
+    <button type="submit" class="rounded-lg bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 text-sm font-medium">Filter</button>
+</form>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead><tr><th>Seat</th><th>Room</th><th>Building</th><th>Floor</th><th>Actions</th></tr></thead>
-                <tbody>
-                    @forelse($seats as $seat)
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-4 py-3 text-left font-medium text-slate-600">Seat</th>
+                    <th class="px-4 py-3 text-left font-medium text-slate-600">Room</th>
+                    <th class="px-4 py-3 text-left font-medium text-slate-600">Floor</th>
+                    <th class="px-4 py-3 text-right font-medium text-slate-600">Allocate</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+                @forelse ($seats as $seat)
                     <tr>
-                        <td><span class="badge bg-success">{{ $seat->seat_number }}</span></td>
-                        <td>{{ $seat->room->room_number }}</td>
-                        <td>{{ $seat->room->building }}</td>
-                        <td>{{ $seat->room->floor }}</td>
-                        <td>
-                            <form action="{{ route('admin.seats.allocate') }}" method="POST" class="d-inline">
+                        <td class="px-4 py-3 font-medium text-slate-800">{{ $seat->seat_no }}</td>
+                        <td class="px-4 py-3 text-slate-600">{{ $seat->room->room_no }}</td>
+                        <td class="px-4 py-3 text-slate-600">{{ $seat->room->floor }}</td>
+                        <td class="px-4 py-3">
+                            <form action="{{ route('admin.seats.allocate') }}" method="POST" class="flex items-center justify-end gap-2">
                                 @csrf
                                 <input type="hidden" name="seat_id" value="{{ $seat->id }}">
-                                <select name="student_id" class="form-select form-select-sm d-inline w-auto" required>
-                                    <option value="">Select Student</option>
-                                    @php
-                                        $students = App\Models\Student::where('status', 'active')->whereDoesntHave('currentAllocation')->limit(20)->get();
-                                    @endphp
-                                    @foreach($students as $student)
-                                        <option value="{{ $student->id }}">{{ $student->student_id }} - {{ $student->name }}</option>
+                                <select name="student_id" class="rounded-lg border border-slate-300 px-2 py-1 text-sm" required>
+                                    <option value="">Select student</option>
+                                    @foreach ($unallocatedStudents as $student)
+                                        <option value="{{ $student->id }}">{{ $student->roll }} - {{ $student->user->name }}</option>
                                     @endforeach
                                 </select>
-                                <button type="submit" class="btn btn-sm btn-success">Allocate</button>
+                                <button type="submit" class="rounded-lg bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-sm font-medium">Allocate</button>
                             </form>
                         </td>
                     </tr>
-                    @empty
-                    <tr><td colspan="5" class="text-center py-4">No available seats found</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="d-flex justify-content-end">{{ $seats->links() }}</div>
+                @empty
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-slate-500">No available seats found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
+    @if ($seats->hasPages())
+        <div class="px-4 py-3 border-t border-slate-200">{{ $seats->links() }}</div>
+    @endif
 </div>
 @endsection

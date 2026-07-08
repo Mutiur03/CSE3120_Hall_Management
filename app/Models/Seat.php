@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\SeatStatus;
 use Database\Factories\SeatFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,5 +60,25 @@ class Seat extends Model
     public function isAvailable(): bool
     {
         return $this->status === SeatStatus::Active && ! $this->isOccupied();
+    }
+
+    /**
+     * @param  Builder<Seat>  $query
+     * @return Builder<Seat>
+     */
+    public function scopeAvailable(Builder $query): Builder
+    {
+        return $query
+            ->where('status', SeatStatus::Active)
+            ->whereDoesntHave('currentAllocation');
+    }
+
+    /**
+     * @param  Builder<Seat>  $query
+     * @return Builder<Seat>
+     */
+    public function scopeOccupied(Builder $query): Builder
+    {
+        return $query->whereHas('currentAllocation');
     }
 }
