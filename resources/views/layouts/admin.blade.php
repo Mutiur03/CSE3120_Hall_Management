@@ -15,6 +15,7 @@
             <div class="flex items-center gap-4 text-sm">
                 <a href="{{ route('admin.students.index') }}" class="text-slate-600 hover:text-slate-900">Students</a>
                 <a href="{{ route('admin.rooms.index') }}" class="text-slate-600 hover:text-slate-900">Rooms</a>
+                <a href="{{ route('admin.applications.index') }}" class="text-slate-600 hover:text-slate-900">Applications</a>
                 <a href="{{ route('admin.change-password') }}" class="text-slate-600 hover:text-slate-900">Change Password</a>
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
@@ -28,6 +29,12 @@
         @if (session('success'))
             <div class="mb-4 rounded-lg bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm">
                 {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="mb-4 rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm">
+                {{ session('error') }}
             </div>
         @endif
 

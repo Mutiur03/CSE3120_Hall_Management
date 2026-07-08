@@ -15,6 +15,9 @@
             <a href="{{ route('student.profile') }}" class="flex items-center rounded-lg px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
                 View Profile
             </a>
+            <a href="{{ route('student.applications.index') }}" class="flex items-center rounded-lg px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                My Applications
+            </a>
         </div>
     </div>
 </div>

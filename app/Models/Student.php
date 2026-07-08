@@ -54,4 +54,9 @@ class Student extends Model
             ->where('status', 'active')
             ->latestOfMany();
     }
+
+    public function seatApplications(): HasMany
+    {
+        return $this->hasMany(SeatApplication::class);
+    }
 }
