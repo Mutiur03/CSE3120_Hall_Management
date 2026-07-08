@@ -36,6 +36,17 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
     Route::get('/students', [AdminStudentController::class, 'index'])->name('students.index');
     Route::get('/seats/available', [App\Http\Controllers\Admin\SeatController::class, 'available'])->name('seats.available');
+    Route::get('/seats/occupied', [App\Http\Controllers\Admin\SeatController::class, 'occupied'])->name('seats.occupied');
+
+    Route::get('/seats/statistics', [App\Http\Controllers\Admin\SeatController::class, 'statistics'])->name('seats.statistics');
+    Route::get('/seats/allocate', [App\Http\Controllers\Admin\SeatController::class, 'allocateForm'])->name('seats.allocate-form');
+    Route::post('/seats/allocate', [App\Http\Controllers\Admin\SeatController::class, 'allocate'])->name('seats.allocate');
+    Route::get('/seats/{seat}/vacate', [App\Http\Controllers\Admin\SeatController::class, 'vacateForm'])->name('seats.vacate-form');
+    Route::post('/seats/{seat}/vacate', [App\Http\Controllers\Admin\SeatController::class, 'vacate'])->name('seats.vacate');
+    Route::get('/seats/{seat}/transfer', [App\Http\Controllers\Admin\SeatController::class, 'transferForm'])->name('seats.transfer-form');
+    Route::post('/seats/{seat}/transfer', [App\Http\Controllers\Admin\SeatController::class, 'transfer'])->name('seats.transfer');
+    Route::get('/seats', [App\Http\Controllers\Admin\SeatController::class, 'index'])->name('seats.index');
+
 
 });
 

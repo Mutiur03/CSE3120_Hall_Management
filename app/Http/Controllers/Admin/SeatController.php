@@ -37,5 +37,21 @@ class SeatController extends Controller
         return view('admin.seats.available', compact('seats', 'buildings', 'floors'));
     }
 
+    public function occupied(Request $request)
+    {
+        $query = Seat::with(['room', 'currentAllocation.student'])->where('status', 'occupied');
+
+        if ($request->filled('building')) {
+            $query->whereHas('room', function ($q) use ($request) {
+                $q->where('building', $request->building);
+            });
+        }
+
+        $seats = $query->paginate(50)->withQueryString();
+        $buildings = Room::select('building')->distinct()->pluck('building');
+
+        return view('admin.seats.occupied', compact('seats', 'buildings'));
+    }
+
    
 }
