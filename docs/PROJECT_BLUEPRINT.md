@@ -317,6 +317,8 @@ Exit gate:
 - Students cannot access admin routes.
 - First-login students cannot bypass password change.
 
+**Implemented (2026-07-05):** `users.is_first_login`, `users.is_active`, student change-password routes, `EnsureStudentPasswordChanged` and `EnsureUserIsActive` middleware, login redirect for first-login students, and inactive-account login blocking.
+
 ### Phase 2: Student Management
 
 Deliver:
@@ -330,6 +332,7 @@ Exit gate:
 
 - Duplicate roll/email/registration number rejected.
 - Students cannot view or edit another student's profile.
+
 
 ### Phase 3: Room And Seat Management
 

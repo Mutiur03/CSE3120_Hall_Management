@@ -13,6 +13,7 @@
         <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
             <a href="{{ route('admin.dashboard') }}" class="font-semibold text-slate-800">Hall Management System</a>
             <div class="flex items-center gap-4 text-sm">
+                <a href="{{ route('admin.students.index') }}" class="text-slate-600 hover:text-slate-900">Students</a>
                 <a href="{{ route('admin.rooms.index') }}" class="text-slate-600 hover:text-slate-900">Rooms</a>
                 <a href="{{ route('admin.change-password') }}" class="text-slate-600 hover:text-slate-900">Change Password</a>
                 <form method="POST" action="{{ route('admin.logout') }}">

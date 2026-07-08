@@ -41,6 +41,16 @@ class AuthController extends Controller
                 ->withInput($request->except('password'));
         }
 
+        if (! Auth::user()->is_active) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()
+                ->withErrors(['email' => 'This account has been deactivated.'])
+                ->withInput($request->except('password'));
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('admin.dashboard'));

@@ -130,4 +130,21 @@ class AuthTest extends TestCase
         $response->assertRedirect(route('admin.change-password'));
         $response->assertSessionHasErrors('current_password');
     }
+
+    public function test_inactive_admin_cannot_login(): void
+    {
+        $admin = User::factory()->admin()->inactive()->create([
+            'email' => 'admin@hall.edu',
+            'password' => 'admin123',
+        ]);
+
+        $response = $this->from(route('login'))->post(route('login'), [
+            'email' => $admin->email,
+            'password' => 'admin123',
+        ]);
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
 }
