@@ -22,7 +22,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/change-password', [AdminAuthController::class, 'changePasswordForm'])->name('change-password');
     Route::post('/change-password', [AdminAuthController::class, 'changePassword']);
@@ -71,6 +72,7 @@ Route::middleware(['auth', 'active', 'role:student'])->prefix('student')->name('
 
     Route::middleware('student.password-changed')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+        
         Route::get('/profile', [StudentProfileController::class, 'show'])->name('profile');
         Route::get('/profile/edit', [StudentProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [StudentProfileController::class, 'update'])->name('profile.update');
