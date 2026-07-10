@@ -84,6 +84,61 @@ class ReportController extends Controller
 
         return view('admin.reports.room-occupancy', compact('rooms'));
     }
+ public function diningReport(Request $request)
+    {
+        $month = $request->filled('month') ? $request->month : now()->format('Y-m');
+        $year = substr($month, 0, 4);
+        $monthNum = substr($month, 5, 2);
+        $daysInMonth = Carbon::create($year, $monthNum)->daysInMonth;
 
-    
+        $dailyStats = [];
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $date = Carbon::create($year, $monthNum, $day)->toDateString();
+            $dailyStats[$day] = [
+                'date' => $date,
+                'breakfast' => DiningAttendance::where('date', $date)->where('meal_type', 'breakfast')->where('present', true)->count(),
+                'lunch' => DiningAttendance::where('date', $date)->where('meal_type', 'lunch')->where('present', true)->count(),
+                'dinner' => DiningAttendance::where('date', $date)->where('meal_type', 'dinner')->where('present', true)->count(),
+            ];
+        }
+
+        $totalBreakfast = array_sum(array_column($dailyStats, 'breakfast'));
+        $totalLunch = array_sum(array_column($dailyStats, 'lunch'));
+        $totalDinner = array_sum(array_column($dailyStats, 'dinner'));
+
+        if ($request->filled('export')) {
+            if ($request->export === 'pdf') {
+                $pdf = Pdf::loadView('admin.reports.exports.dining-pdf', compact('dailyStats', 'month', 'daysInMonth', 'totalBreakfast', 'totalLunch', 'totalDinner'));
+                return $pdf->download('dining-report-' . $month . '.pdf');
+            }
+
+            if ($request->export === 'excel') {
+                return Excel::download(new DiningExport($month), 'dining-report-' . $month . '.xlsx');
+            }
+        }
+
+        return view('admin.reports.dining', compact('month', 'dailyStats', 'daysInMonth', 'totalBreakfast', 'totalLunch', 'totalDinner'));
+    }
+
+    public function dashboardOverview()
+    {
+        $data = [
+            'total_students' => Student::count(),
+            'active_students' => Student::where('status', 'active')->count(),
+            'total_rooms' => Room::count(),
+            'total_seats' => Seat::count(),
+            'occupied_seats' => Seat::where('status', 'occupied')->count(),
+            'available_seats' => Seat::where('status', 'available')->count(),
+            'pending_applications' => SeatApplication::where('status', 'pending')->count(),
+            'pending_room_changes' => RoomChangeRequest::where('status', 'pending')->count(),
+            'department_distribution' => Student::selectRaw('department, count(*) as count')->groupBy('department')->get(),
+            'building_occupancy' => Room::select('building')->groupBy('building')->get()->map(function ($item) {
+                $item->total = Seat::whereHas('room', fn($q) => $q->where('building', $item->building))->count();
+                $item->occupied = Seat::whereHas('room', fn($q) => $q->where('building', $item->building))->where('status', 'occupied')->count();
+                return $item;
+            }),
+        ];
+
+        return view('admin.reports.overview', compact('data'));
+    }
 }

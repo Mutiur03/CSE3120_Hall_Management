@@ -32,5 +32,25 @@
             </div>
         </div>
     </div>
+     <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card report-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-utensils fa-3x text-warning mb-3"></i>
+                <h5>Dining Report</h5>
+                <p class="text-muted">View monthly dining statistics</p>
+                <a href="{{ route('admin.reports.dining') }}" class="btn btn-warning">View Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card report-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-pie fa-3x text-info mb-3"></i>
+                <h5>Overview Dashboard</h5>
+                <p class="text-muted">System overview and analytics</p>
+                <a href="{{ route('admin.reports.overview') }}" class="btn btn-info text-white">View Report</a>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

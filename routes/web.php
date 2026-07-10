@@ -57,6 +57,8 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/students', [App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.students');
     Route::get('/reports/room-occupancy', [App\Http\Controllers\Admin\ReportController::class, 'roomOccupancyReport'])->name('reports.room-occupancy');
+    Route::get('/reports/dining', [App\Http\Controllers\Admin\ReportController::class, 'diningReport'])->name('reports.dining');
+    Route::get('/reports/overview', [App\Http\Controllers\Admin\ReportController::class, 'dashboardOverview'])->name('reports.overview');
 
 });
 
