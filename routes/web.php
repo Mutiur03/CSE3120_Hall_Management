@@ -53,6 +53,10 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::post('/applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('/applications/{application}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
+
+    Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/students', [App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.students');
+   
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {
