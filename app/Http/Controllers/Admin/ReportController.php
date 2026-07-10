@@ -61,5 +61,29 @@ class ReportController extends Controller
         return view('admin.reports.student', compact('students', 'departments', 'sessions'));
     }
 
+    public function roomOccupancyReport(Request $request)
+    {
+        $rooms = Room::withCount(['seats as total_seats', 'seats as occupied_seats' => function ($query) {
+            $query->where('status', 'occupied');
+        }])->get()->map(function ($room) {
+            $room->available_seats = $room->total_seats - $room->occupied_seats;
+            $room->occupancy_percentage = $room->total_seats > 0 ? round(($room->occupied_seats / $room->total_seats) * 100, 2) : 0;
+            return $room;
+        });
+
+        if ($request->filled('export')) {
+            if ($request->export === 'pdf') {
+                $pdf = Pdf::loadView('admin.reports.exports.room-pdf', compact('rooms'));
+                return $pdf->download('room-occupancy-report-' . now()->format('Y-m-d') . '.pdf');
+            }
+
+            if ($request->export === 'excel') {
+                return Excel::download(new RoomOccupancyExport(), 'room-occupancy-report-' . now()->format('Y-m-d') . '.xlsx');
+            }
+        }
+
+        return view('admin.reports.room-occupancy', compact('rooms'));
+    }
+
     
 }
