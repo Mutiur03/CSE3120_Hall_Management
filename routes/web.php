@@ -22,7 +22,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/change-password', [AdminAuthController::class, 'changePasswordForm'])->name('change-password');
     Route::post('/change-password', [AdminAuthController::class, 'changePassword']);
@@ -52,6 +53,13 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::post('/applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('/applications/{application}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
+
+    Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/students', [App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.students');
+    Route::get('/reports/room-occupancy', [App\Http\Controllers\Admin\ReportController::class, 'roomOccupancyReport'])->name('reports.room-occupancy');
+    Route::get('/reports/dining', [App\Http\Controllers\Admin\ReportController::class, 'diningReport'])->name('reports.dining');
+    Route::get('/reports/overview', [App\Http\Controllers\Admin\ReportController::class, 'dashboardOverview'])->name('reports.overview');
+
 });
 
 Route::middleware('guest')->prefix('student')->name('student.')->group(function () {
@@ -71,6 +79,7 @@ Route::middleware(['auth', 'active', 'role:student'])->prefix('student')->name('
 
     Route::middleware('student.password-changed')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+        
         Route::get('/profile', [StudentProfileController::class, 'show'])->name('profile');
         Route::get('/profile/edit', [StudentProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [StudentProfileController::class, 'update'])->name('profile.update');
