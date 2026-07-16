@@ -31,6 +31,7 @@
                     <th class="px-4 py-3 text-left font-medium text-slate-600">Status</th>
                     <th class="px-4 py-3 text-left font-medium text-slate-600">Admin Comment</th>
                     <th class="px-4 py-3 text-left font-medium text-slate-600">Date</th>
+                    <th class="px-4 py-3 text-right font-medium text-slate-600">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
@@ -54,10 +55,13 @@
                         </td>
                         <td class="px-4 py-3 text-slate-600">{{ $request->admin_comment ?? '—' }}</td>
                         <td class="px-4 py-3 text-slate-600">{{ $request->created_at->format('M d, Y') }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <a href="{{ route('student.room-changes.show', $request) }}" class="text-blue-600 hover:text-blue-700 font-medium">View</a>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-slate-500">No room change requests found.</td>
+                        <td colspan="8" class="px-4 py-8 text-center text-slate-500">No room change requests found.</td>
                     </tr>
                 @endforelse
             </tbody>

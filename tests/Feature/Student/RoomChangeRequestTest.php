@@ -149,4 +149,36 @@ class RoomChangeRequestTest extends TestCase
         $response->assertSee('My Room Change Requests');
         $response->assertSee('Need to move closer to friends');
     }
+
+    public function test_student_can_view_own_request_status_detail(): void
+    {
+        [$student] = $this->allocatedStudent();
+
+        $request = RoomChangeRequest::factory()->rejected()->create([
+            'student_id' => $student->id,
+            'reason' => 'Roommate conflict',
+            'admin_comment' => 'Requested room is full.',
+        ]);
+
+        $response = $this->actingAs($student->user)->get(route('student.room-changes.show', $request));
+
+        $response->assertOk();
+        $response->assertSee('Room Change Request Status');
+        $response->assertSee('Rejected');
+        $response->assertSee('Roommate conflict');
+        $response->assertSee('Requested room is full.');
+    }
+
+    public function test_student_cannot_view_another_students_request(): void
+    {
+        [$owner] = $this->allocatedStudent();
+        $request = RoomChangeRequest::factory()->create(['student_id' => $owner->id]);
+
+        $other = Student::factory()->create();
+        $other->user->update(['is_first_login' => false]);
+
+        $response = $this->actingAs($other->user)->get(route('student.room-changes.show', $request));
+
+        $response->assertForbidden();
+    }
 }

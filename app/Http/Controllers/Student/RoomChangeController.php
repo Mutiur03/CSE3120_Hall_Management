@@ -10,6 +10,7 @@ use App\Models\Room;
 use App\Models\RoomChangeRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class RoomChangeController extends Controller
 {
@@ -25,6 +26,18 @@ class RoomChangeController extends Controller
             ->paginate(10);
 
         return view('student.room-changes.index', compact('requests', 'student'));
+    }
+
+    public function show(RoomChangeRequest $roomChange): View
+    {
+        $student = auth()->user()->student;
+
+        abort_if($student === null, Response::HTTP_NOT_FOUND);
+        abort_unless($roomChange->student_id === $student->id, Response::HTTP_FORBIDDEN);
+
+        $roomChange->load('requestedRoom', 'currentSeat.room', 'reviewer');
+
+        return view('student.room-changes.show', compact('roomChange'));
     }
 
     public function create(): View|RedirectResponse
