@@ -59,4 +59,9 @@ class Student extends Model
     {
         return $this->hasMany(SeatApplication::class);
     }
+
+    public function roomChangeRequests(): HasMany
+    {
+        return $this->hasMany(RoomChangeRequest::class);
+    }
 }

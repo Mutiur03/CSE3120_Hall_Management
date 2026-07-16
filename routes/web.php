@@ -88,5 +88,9 @@ Route::middleware(['auth', 'active', 'role:student'])->prefix('student')->name('
         Route::get('/applications', [App\Http\Controllers\Student\ApplicationController::class, 'index'])->name('applications.index');
         Route::get('/applications/create', [App\Http\Controllers\Student\ApplicationController::class, 'create'])->name('applications.create');
         Route::post('/applications', [App\Http\Controllers\Student\ApplicationController::class, 'store'])->name('applications.store');
+
+        Route::get('/room-changes', [App\Http\Controllers\Student\RoomChangeController::class, 'index'])->name('room-changes.index');
+        Route::get('/room-changes/create', [App\Http\Controllers\Student\RoomChangeController::class, 'create'])->name('room-changes.create');
+        Route::post('/room-changes', [App\Http\Controllers\Student\RoomChangeController::class, 'store'])->name('room-changes.store');
     });
 });

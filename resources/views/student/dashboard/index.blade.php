@@ -21,6 +21,9 @@
             <a href="{{ route('student.applications.index') }}" class="flex items-center rounded-lg px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
                 My Applications
             </a>
+            <a href="{{ route('student.room-changes.index') }}" class="flex items-center rounded-lg px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                Room Change Requests
+            </a>
         </div>
     </div>
 </div>
