@@ -16,6 +16,7 @@
                 <a href="{{ route('admin.students.index') }}" class="text-slate-600 hover:text-slate-900">Students</a>
                 <a href="{{ route('admin.rooms.index') }}" class="text-slate-600 hover:text-slate-900">Rooms</a>
                 <a href="{{ route('admin.applications.index') }}" class="text-slate-600 hover:text-slate-900">Applications</a>
+                <a href="{{ route('admin.room-changes.index') }}" class="text-slate-600 hover:text-slate-900">Room Changes</a>
                 <a href="{{ route('admin.change-password') }}" class="text-slate-600 hover:text-slate-900">Change Password</a>
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf

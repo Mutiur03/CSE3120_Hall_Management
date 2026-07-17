@@ -53,6 +53,10 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::post('/applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('/applications/{application}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
 
+    Route::get('/room-changes', [App\Http\Controllers\Admin\RoomChangeController::class, 'index'])->name('room-changes.index');
+    Route::post('/room-changes/{roomChange}/approve', [App\Http\Controllers\Admin\RoomChangeController::class, 'approve'])->name('room-changes.approve');
+    Route::post('/room-changes/{roomChange}/reject', [App\Http\Controllers\Admin\RoomChangeController::class, 'reject'])->name('room-changes.reject');
+
     Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/students', [App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.students');
     Route::get('/reports/room-occupancy', [App\Http\Controllers\Admin\ReportController::class, 'roomOccupancyReport'])->name('reports.room-occupancy');
