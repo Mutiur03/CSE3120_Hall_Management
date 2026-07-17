@@ -2,113 +2,66 @@
 
 namespace App\Http\Controllers\Student;
 
-use App\Enums\RoomChangeRequestStatus;
-use App\Enums\RoomStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\StoreRoomChangeRequestRequest;
-use App\Models\Room;
 use App\Models\RoomChangeRequest;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\Response;
+use App\Models\Room;
+use Illuminate\Http\Request;
 
 class RoomChangeController extends Controller
 {
-    public function index(): View
+    public function index()
     {
-        $student = auth()->user()->student;
-
-        abort_if($student === null, 404);
-
-        $requests = $student->roomChangeRequests()
-            ->with('requestedRoom', 'currentSeat.room')
-            ->latest()
-            ->paginate(10);
-
-        return view('student.room-changes.index', compact('requests', 'student'));
+        $student = auth('student')->user();
+        $requests = $student->roomChangeRequests()->latest()->paginate(10);
+        return view('student.room-changes.index', compact('requests'));
     }
 
-    public function show(RoomChangeRequest $roomChange): View
+    public function create()
     {
-        $student = auth()->user()->student;
+        $student = auth('student')->user();
+        $currentRoom = $student->currentRoom();
 
-        abort_if($student === null, Response::HTTP_NOT_FOUND);
-        abort_unless($roomChange->student_id === $student->id, Response::HTTP_FORBIDDEN);
-
-        $roomChange->load('requestedRoom', 'currentSeat.room', 'reviewer');
-
-        return view('student.room-changes.show', compact('roomChange'));
-    }
-
-    public function create(): View|RedirectResponse
-    {
-        $student = auth()->user()->student;
-
-        abort_if($student === null, 404);
-
-        $allocation = $student->currentAllocation()->with('seat.room')->first();
-
-        if ($allocation === null) {
-            return redirect()
-                ->route('student.room-changes.index')
-                ->with('error', 'You must have an allocated seat before requesting a room change.');
+        if (!$currentRoom) {
+            return redirect()->route('student.dashboard')
+                ->with('error', 'You do not have an allocated room.');
         }
 
-        if ($student->roomChangeRequests()->where('status', RoomChangeRequestStatus::Pending)->exists()) {
-            return redirect()
-                ->route('student.room-changes.index')
+        $pendingRequest = $student->roomChangeRequests()->where('status', 'pending')->first();
+        if ($pendingRequest) {
+            return redirect()->route('student.room-changes.index')
                 ->with('error', 'You already have a pending room change request.');
         }
 
-        $currentRoomId = $allocation->seat?->room_id;
-
-        $rooms = Room::query()
-            ->where('status', RoomStatus::Active)
-            ->when($currentRoomId, fn ($query) => $query->whereKeyNot($currentRoomId))
-            ->orderBy('floor')
-            ->orderBy('room_no')
+        $availableRooms = Room::where('id', '!=', $currentRoom->id)
+            ->where('status', '!=', 'full')
+            ->where('gender_type', $student->gender === 'male' ? 'male' : 'female')
             ->get();
 
-        return view('student.room-changes.create', compact('allocation', 'rooms'));
+        return view('student.room-changes.create', compact('currentRoom', 'availableRooms'));
     }
 
-    public function store(StoreRoomChangeRequestRequest $request): RedirectResponse
+    public function store(Request $request)
     {
-        $student = auth()->user()->student;
+        $student = auth('student')->user();
+        $currentRoom = $student->currentRoom();
 
-        abort_if($student === null, 404);
-
-        $allocation = $student->currentAllocation()->with('seat')->first();
-
-        if ($allocation === null) {
-            return redirect()
-                ->route('student.room-changes.index')
-                ->with('error', 'You must have an allocated seat before requesting a room change.');
+        if (!$currentRoom) {
+            return redirect()->route('student.dashboard')
+                ->with('error', 'You do not have an allocated room.');
         }
 
-        if ($student->roomChangeRequests()->where('status', RoomChangeRequestStatus::Pending)->exists()) {
-            return redirect()
-                ->route('student.room-changes.index')
-                ->with('error', 'You already have a pending room change request.');
-        }
-
-        if ((int) $request->validated('requested_room_id') === (int) $allocation->seat?->room_id) {
-            return redirect()
-                ->route('student.room-changes.create')
-                ->withInput()
-                ->with('error', 'The requested room is your current room. Choose a different room.');
-        }
-
-        RoomChangeRequest::create([
-            'student_id' => $student->id,
-            'current_seat_id' => $allocation->seat_id,
-            'requested_room_id' => $request->validated('requested_room_id'),
-            'reason' => $request->validated('reason'),
-            'status' => RoomChangeRequestStatus::Pending,
+        $validated = $request->validate([
+            'requested_room_id' => 'required|exists:rooms,id',
+            'reason' => 'required|string|max:1000',
         ]);
 
-        return redirect()
-            ->route('student.room-changes.index')
+        $validated['student_id'] = $student->id;
+        $validated['current_room_id'] = $currentRoom->id;
+        $validated['status'] = 'pending';
+
+        RoomChangeRequest::create($validated);
+
+        return redirect()->route('student.room-changes.index')
             ->with('success', 'Room change request submitted successfully.');
     }
 }
