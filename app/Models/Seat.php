@@ -2,83 +2,50 @@
 
 namespace App\Models;
 
-use App\Enums\SeatStatus;
-use Database\Factories\SeatFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Seat extends Model
 {
-    /** @use HasFactory<SeatFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'room_id',
-        'seat_no',
+        'seat_number',
         'status',
+        'notes',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'status' => SeatStatus::class,
+            'status' => 'string',
         ];
     }
 
-    public function room(): BelongsTo
+    public function room()
     {
         return $this->belongsTo(Room::class);
     }
 
-    public function allocations(): HasMany
+    public function allocations()
     {
         return $this->hasMany(SeatAllocation::class);
     }
 
-    public function currentAllocation(): HasOne
+    public function currentAllocation()
     {
-        return $this->hasOne(SeatAllocation::class)
-            ->where('status', 'active')
-            ->latestOfMany();
-    }
-
-    public function isOccupied(): bool
-    {
-        return $this->currentAllocation()->exists();
+        return $this->hasOne(SeatAllocation::class)->where('status', 'active')->latest();
     }
 
     public function isAvailable(): bool
     {
-        return $this->status === SeatStatus::Active && ! $this->isOccupied();
+        return $this->status === 'available';
     }
 
-    /**
-     * @param  Builder<Seat>  $query
-     * @return Builder<Seat>
-     */
-    public function scopeAvailable(Builder $query): Builder
+    public function isOccupied(): bool
     {
-        return $query
-            ->where('status', SeatStatus::Active)
-            ->whereDoesntHave('currentAllocation');
-    }
-
-    /**
-     * @param  Builder<Seat>  $query
-     * @return Builder<Seat>
-     */
-    public function scopeOccupied(Builder $query): Builder
-    {
-        return $query->whereHas('currentAllocation');
+        return $this->status === 'occupied';
     }
 }

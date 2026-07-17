@@ -3,98 +3,73 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function showLoginForm(): View
+    public function showLoginForm()
     {
         return view('student.auth.login');
     }
 
-    public function login(Request $request): RedirectResponse
+    public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+            'student_id' => 'required|string',
+            'password' => 'required',
         ]);
 
-        $remember = $request->boolean('remember');
+        $student = Student::where('student_id', $credentials['student_id'])->first();
 
-        if (! Auth::attempt($credentials, $remember)) {
-            return back()
-                ->withErrors(['email' => 'Invalid credentials.'])
-                ->withInput($request->except('password'));
+        if ($student && Hash::check($credentials['password'], $student->password)) {
+            Auth::guard('student')->login($student, $request->has('remember'));
+            $request->session()->regenerate();
+
+            if (!$student->password_changed) {
+                return redirect()->route('student.change-password')
+                    ->with('warning', 'Please change your default password.');
+            }
+
+            return redirect()->intended(route('student.dashboard'));
         }
 
-        if (! Auth::user()->isStudent()) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return back()
-                ->withErrors(['email' => 'Invalid credentials.'])
-                ->withInput($request->except('password'));
-        }
-
-        if (! Auth::user()->is_active) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return back()
-                ->withErrors(['email' => 'This account has been deactivated.'])
-                ->withInput($request->except('password'));
-        }
-
-        $request->session()->regenerate();
-
-        $user = Auth::user();
-
-        if ($user->is_first_login) {
-            return redirect()
-                ->route('student.change-password')
-                ->with('warning', 'Please change your default password before continuing.');
-        }
-
-        return redirect()->intended(route('student.dashboard'));
+        return redirect()->back()
+            ->withErrors(['student_id' => 'Invalid student ID or password.'])
+            ->withInput($request->except('password'));
     }
 
-    public function changePasswordForm(): View
+    public function changePasswordForm()
     {
         return view('student.auth.change-password');
     }
 
-    public function changePassword(Request $request): RedirectResponse
+    public function changePassword(Request $request)
     {
         $validated = $request->validate([
-            'current_password' => ['required'],
-            'new_password' => ['required', 'min:6', 'confirmed'],
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
         ]);
 
-        $user = Auth::user();
+        $student = Auth::guard('student')->user();
 
-        if (! Hash::check($validated['current_password'], $user->password)) {
-            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        if (!Hash::check($validated['current_password'], $student->password)) {
+            return redirect()->back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 
-        $user->update([
+        $student->update([
             'password' => Hash::make($validated['new_password']),
-            'is_first_login' => false,
+            'password_changed' => true,
         ]);
 
-        return redirect()
-            ->route('student.dashboard')
-            ->with('success', 'Password changed successfully.');
+        return redirect()->route('student.dashboard')->with('success', 'Password changed successfully.');
     }
 
-    public function logout(Request $request): RedirectResponse
+    public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('student')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

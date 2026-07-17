@@ -2,69 +2,53 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
-        'is_first_login',
-        'is_active',
     ];
 
-    /**
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => UserRole::class,
-            'is_first_login' => 'boolean',
-            'is_active' => 'boolean',
+            'role' => 'string',
         ];
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === UserRole::Admin;
+        return $this->role === 'admin';
     }
 
-    public function isStudent(): bool
+    public function reports()
     {
-        return $this->role === UserRole::Student;
+        return $this->hasMany(Report::class, 'generated_by');
     }
 
-    public function isActive(): bool
+    public function approvedApplications()
     {
-        return $this->is_active;
+        return $this->hasMany(SeatApplication::class, 'approved_by');
     }
 
-    public function student(): HasOne
+    public function approvedRoomChanges()
     {
-        return $this->hasOne(Student::class);
+        return $this->hasMany(RoomChangeRequest::class, 'approved_by');
     }
 }

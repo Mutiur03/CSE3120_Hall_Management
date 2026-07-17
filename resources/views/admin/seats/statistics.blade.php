@@ -1,70 +1,91 @@
 @extends('layouts.admin')
 
-@section('title', 'Seat Statistics | Hall Management System')
+@section('title', 'Seat Statistics')
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.seats.index') }}">Seats</a></li>
+    <li class="breadcrumb-item active">Statistics</li>
+@endsection
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-slate-800">Seat Statistics</h1>
+<div class="page-header">
+    <h1><i class="fas fa-chart-bar me-2"></i>Seat Statistics</h1>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <p class="text-sm text-slate-500">Total Seats</p>
-        <p class="text-2xl font-bold text-slate-800 mt-1">{{ $totalSeats }}</p>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <p class="text-sm text-slate-500">Occupied</p>
-        <p class="text-2xl font-bold text-red-600 mt-1">{{ $occupiedSeats }}</p>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <p class="text-sm text-slate-500">Available</p>
-        <p class="text-2xl font-bold text-green-600 mt-1">{{ $availableSeats }}</p>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <p class="text-sm text-slate-500">Inactive</p>
-        <p class="text-2xl font-bold text-slate-600 mt-1">{{ $inactiveSeats }}</p>
+<div class="stats-grid">
+    <div class="stat-card bg-primary"><div class="stat-icon"><i class="fas fa-bed"></i></div><div class="stat-info"><h3>{{ $totalSeats }}</h3><p>Total Seats</p></div></div>
+    <div class="stat-card bg-danger"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-info"><h3>{{ $occupiedSeats }}</h3><p>Occupied</p></div></div>
+    <div class="stat-card bg-success"><div class="stat-icon"><i class="fas fa-circle"></i></div><div class="stat-info"><h3>{{ $availableSeats }}</h3><p>Available</p></div></div>
+    <div class="stat-card bg-warning"><div class="stat-icon"><i class="fas fa-tools"></i></div><div class="stat-info"><h3>{{ $maintenanceSeats }}</h3><p>Maintenance</p></div></div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header"><h5>Overall Occupancy</h5></div>
+    <div class="card-body">
+        <div class="progress" style="height: 30px;">
+            <div class="progress-bar bg-danger" style="width: {{ $occupancyPercentage }}%">{{ $occupancyPercentage }}% Occupied</div>
+            <div class="progress-bar bg-success" style="width: {{ 100 - $occupancyPercentage }}%">{{ 100 - $occupancyPercentage }}% Available</div>
+        </div>
     </div>
 </div>
 
-<div class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
-    <h2 class="font-semibold text-slate-800 mb-3">Overall Occupancy</h2>
-    <div class="h-4 rounded-full bg-slate-100 overflow-hidden">
-        <div class="h-full bg-red-500" style="width: {{ $occupancyPercentage }}%"></div>
+<div class="row mt-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><h5>Building-wise Statistics</h5></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Building</th><th>Total</th><th>Occupied</th><th>Available</th><th>Rate</th></tr></thead>
+                        <tbody>
+                            @foreach($buildingStats as $stat)
+                            <tr>
+                                <td>{{ $stat->building }}</td>
+                                <td>{{ $stat->total_seats }}</td>
+                                <td>{{ $stat->occupied }}</td>
+                                <td>{{ $stat->available }}</td>
+                                <td>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-{{ $stat->occupancy_rate > 80 ? 'danger' : 'success' }}" style="width: {{ $stat->occupancy_rate }}%"></div>
+                                    </div>
+                                    <small>{{ $stat->occupancy_rate }}%</small>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    <p class="text-sm text-slate-600 mt-2">{{ $occupancyPercentage }}% occupied</p>
-</div>
-
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-    <div class="px-5 py-4 border-b border-slate-200">
-        <h2 class="font-semibold text-slate-800">Floor-wise Statistics</h2>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-4 py-3 text-left font-medium text-slate-600">Floor</th>
-                    <th class="px-4 py-3 text-left font-medium text-slate-600">Total</th>
-                    <th class="px-4 py-3 text-left font-medium text-slate-600">Occupied</th>
-                    <th class="px-4 py-3 text-left font-medium text-slate-600">Available</th>
-                    <th class="px-4 py-3 text-left font-medium text-slate-600">Rate</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200">
-                @forelse ($floorStats as $stat)
-                    <tr>
-                        <td class="px-4 py-3 text-slate-800">Floor {{ $stat->floor }}</td>
-                        <td class="px-4 py-3 text-slate-600">{{ $stat->total_seats }}</td>
-                        <td class="px-4 py-3 text-slate-600">{{ $stat->occupied_seats }}</td>
-                        <td class="px-4 py-3 text-slate-600">{{ $stat->available_seats }}</td>
-                        <td class="px-4 py-3 text-slate-600">{{ $stat->occupancy_rate }}%</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-slate-500">No floor data available.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><h5>Floor-wise Occupancy</h5></div>
+            <div class="card-body">
+                <canvas id="floorChart" height="200"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+const ctx = document.getElementById('floorChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {!! json_encode($floorStats->pluck('floor')->map(fn($f) => 'Floor '.$f)) !!},
+        datasets: [
+            { label: 'Total Seats', data: {!! json_encode($floorStats->pluck('total_seats')) !!}, backgroundColor: '#2563eb' },
+            { label: 'Occupied', data: {!! json_encode($floorStats->pluck('occupied')) !!}, backgroundColor: '#dc2626' }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } }
+    }
+});
+</script>
+@endpush

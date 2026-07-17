@@ -1,41 +1,48 @@
 @extends('layouts.admin')
 
-@section('title', 'Transfer Seat | Hall Management System')
+@section('title', 'Transfer Seat')
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.seats.index') }}">Seats</a></li>
+    <li class="breadcrumb-item active">Transfer</li>
+@endsection
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-slate-800">Transfer Seat</h1>
+<div class="page-header">
+    <h1><i class="fas fa-exchange-alt me-2"></i>Transfer Student</h1>
+    <a href="{{ route('admin.seats.index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 max-w-xl">
-    <dl class="space-y-3 text-sm mb-6">
-        <div class="flex justify-between gap-4">
-            <dt class="text-slate-500">Current Seat</dt>
-            <dd class="font-medium text-slate-800">{{ $seat->seat_no }} (Room {{ $seat->room->room_no }})</dd>
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-info">
+            <h5>Current Seat Details</h5>
+            <p class="mb-1"><strong>Room:</strong> {{ $seat->room->room_number }} ({{ $seat->room->building }})</p>
+            <p class="mb-1"><strong>Seat:</strong> {{ $seat->seat_number }}</p>
+            <p class="mb-0"><strong>Student:</strong> {{ $seat->currentAllocation?->student->name ?? 'N/A' }}</p>
         </div>
-        <div class="flex justify-between gap-4">
-            <dt class="text-slate-500">Student</dt>
-            <dd class="font-medium text-slate-800">{{ $seat->currentAllocation->student->user->name }}</dd>
-        </div>
-    </dl>
 
-    <form action="{{ route('admin.seats.transfer', $seat) }}" method="POST" class="space-y-4">
-        @csrf
-        <div>
-            <label for="target_seat_id" class="block text-sm font-medium text-slate-700 mb-1">Target Seat</label>
-            <select id="target_seat_id" name="target_seat_id" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required>
-                <option value="">Select target seat</option>
-                @foreach ($targetSeats as $targetSeat)
-                    <option value="{{ $targetSeat->id }}" @selected(old('target_seat_id') == $targetSeat->id)>
-                        {{ $targetSeat->seat_no }} (Room {{ $targetSeat->room->room_no }}, Floor {{ $targetSeat->room->floor }})
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex items-center gap-3">
-            <button type="submit" class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium">Transfer</button>
-            <a href="{{ route('admin.seats.occupied') }}" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</a>
-        </div>
-    </form>
+        <form action="{{ route('admin.seats.transfer', $seat) }}" method="POST">
+            @csrf
+            <div class="mb-3">
+                <label class="form-label">Select New Seat <span class="text-danger">*</span></label>
+                <select name="new_seat_id" class="form-select @error('new_seat_id') is-invalid @enderror" required>
+                    <option value="">Choose New Seat</option>
+                    @foreach($availableSeats as $availSeat)
+                        <option value="{{ $availSeat->id }}">{{ $availSeat->room->building }} - Room {{ $availSeat->room->room_number }} - {{ $availSeat->seat_number }} (Floor {{ $availSeat->room->floor }})</option>
+                    @endforeach
+                </select>
+                @error('new_seat_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Notes</label>
+                <textarea name="notes" class="form-control" rows="3" placeholder="Optional notes..."></textarea>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ route('admin.seats.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-exchange-alt me-1"></i>Transfer Student</button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection

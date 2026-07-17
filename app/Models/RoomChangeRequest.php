@@ -2,64 +2,55 @@
 
 namespace App\Models;
 
-use App\Enums\RoomChangeRequestStatus;
-use Database\Factories\RoomChangeRequestFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RoomChangeRequest extends Model
 {
-    /** @use HasFactory<RoomChangeRequestFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'student_id',
-        'current_seat_id',
+        'current_room_id',
         'requested_room_id',
         'reason',
         'status',
-        'admin_comment',
-        'reviewed_by',
-        'reviewed_at',
+        'admin_remarks',
+        'approved_by',
+        'approved_at',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'status' => RoomChangeRequestStatus::class,
-            'reviewed_at' => 'datetime',
+            'status' => 'string',
+            'approved_at' => 'datetime',
         ];
     }
 
-    public function student(): BelongsTo
+    public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
-    public function currentSeat(): BelongsTo
+    public function currentRoom()
     {
-        return $this->belongsTo(Seat::class, 'current_seat_id');
+        return $this->belongsTo(Room::class, 'current_room_id');
     }
 
-    public function requestedRoom(): BelongsTo
+    public function requestedRoom()
     {
         return $this->belongsTo(Room::class, 'requested_room_id');
     }
 
-    public function reviewer(): BelongsTo
+    public function approver()
     {
-        return $this->belongsTo(User::class, 'reviewed_by');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
-    public function isPending(): bool
+    public function scopePending($query)
     {
-        return $this->status === RoomChangeRequestStatus::Pending;
+        return $query->where('status', 'pending');
     }
 }
