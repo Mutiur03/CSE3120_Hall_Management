@@ -2,53 +2,45 @@
 
 namespace App\Models;
 
-use App\Enums\AllocationStatus;
-use Database\Factories\SeatAllocationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SeatAllocation extends Model
 {
-    /** @use HasFactory<SeatAllocationFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'student_id',
         'seat_id',
-        'allocated_by',
-        'allocated_at',
-        'vacated_at',
+        'room_id',
+        'allocation_date',
+        'vacate_date',
         'status',
+        'notes',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'allocated_at' => 'date',
-            'vacated_at' => 'date',
-            'status' => AllocationStatus::class,
+            'allocation_date' => 'date',
+            'vacate_date' => 'date',
+            'status' => 'string',
         ];
     }
 
-    public function student(): BelongsTo
+    public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
-    public function seat(): BelongsTo
+    public function seat()
     {
         return $this->belongsTo(Seat::class);
     }
 
-    public function allocatedBy(): BelongsTo
+    public function room()
     {
-        return $this->belongsTo(User::class, 'allocated_by');
+        return $this->belongsTo(Room::class);
     }
 }
