@@ -217,4 +217,36 @@ class RoomChangeApprovalTest extends TestCase
             'status' => RoomChangeRequestStatus::Pending->value,
         ]);
     }
+
+    public function test_cannot_reject_non_pending_request(): void
+    {
+        $s = $this->scenario();
+        $s['request']->update(['status' => RoomChangeRequestStatus::Approved]);
+
+        $response = $this->actingAs($s['admin'])->post(route('admin.room-changes.reject', $s['request']), [
+            'admin_comment' => 'Changed my mind.',
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('room_change_requests', [
+            'id' => $s['request']->id,
+            'status' => RoomChangeRequestStatus::Approved->value,
+        ]);
+    }
+
+    public function test_student_cannot_reject_request(): void
+    {
+        $s = $this->scenario();
+        $other = Student::factory()->create();
+
+        $response = $this->actingAs($other->user)->post(route('admin.room-changes.reject', $s['request']), [
+            'admin_comment' => 'Not allowed.',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('room_change_requests', [
+            'id' => $s['request']->id,
+            'status' => RoomChangeRequestStatus::Pending->value,
+        ]);
+    }
 }
