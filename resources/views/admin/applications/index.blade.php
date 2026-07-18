@@ -43,7 +43,7 @@
                         <td>{{ $app->student->department }}</td>
                         <td>{{ $app->preferred_building ?? 'Any' }}<br>{{ $app->preferred_room ?? '' }}</td>
                         <td>{{ Str::limit($app->reason, 50) }}</td>
-                        <td><span class="badge bg-{{ $app->status === 'pending' ? 'warning' : ($app->status === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($app->status) }}</span></td>
+                        <td><span class="badge bg-{{ $app->status->value === 'pending' ? 'warning' : ($app->status->value === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($app->status->value) }}</span></td>
                         <td>{{ $app->created_at->format('M d, Y') }}</td>
                         <td>
                             <a href="{{ route('admin.applications.show', $app) }}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>

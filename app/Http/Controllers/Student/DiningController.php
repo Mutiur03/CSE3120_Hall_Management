@@ -10,7 +10,7 @@ class DiningController extends Controller
 {
     public function status()
     {
-        $student = auth('student')->user();
+        $student = auth()->user()->student;
         $meals = $student->meals()->latest()->limit(30)->get();
         $todayMeal = Meal::where('student_id', $student->id)->where('date', today())->first();
 
@@ -19,21 +19,22 @@ class DiningController extends Controller
 
     public function toggleMeal(Request $request)
     {
-        $student = auth('student')->user();
+        $student = auth()->user()->student;
         $meal = Meal::firstOrCreate(
             ['student_id' => $student->id, 'date' => today()],
             ['breakfast' => true, 'lunch' => true, 'dinner' => true, 'meal_active' => true]
         );
 
-        $meal->update(['meal_active' => !$meal->meal_active]);
+        $meal->update(['meal_active' => ! $meal->meal_active]);
 
         $status = $meal->meal_active ? 'activated' : 'deactivated';
+
         return redirect()->back()->with('success', "Meal has been {$status}.");
     }
 
     public function updateMealPreference(Request $request)
     {
-        $student = auth('student')->user();
+        $student = auth()->user()->student;
         $meal = Meal::firstOrCreate(
             ['student_id' => $student->id, 'date' => today()],
             ['breakfast' => true, 'lunch' => true, 'dinner' => true, 'meal_active' => true]

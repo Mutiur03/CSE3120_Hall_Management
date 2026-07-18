@@ -31,7 +31,7 @@
                 <label class="form-label">Select Seat <span class="text-danger">*</span></label>
                 <select name="seat_id" class="form-select @error('seat_id') is-invalid @enderror" required>
                     <option value="">Choose Seat</option>
-                    @foreach($availableSeats as $seat)
+                    @foreach($seats as $seat)
                         <option value="{{ $seat->id }}">{{ $seat->room->building }} - Room {{ $seat->room->room_number }} - {{ $seat->seat_number }} (Floor {{ $seat->room->floor }})</option>
                     @endforeach
                 </select>

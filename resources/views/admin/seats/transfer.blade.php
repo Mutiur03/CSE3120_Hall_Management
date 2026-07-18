@@ -28,7 +28,7 @@
                 <label class="form-label">Select New Seat <span class="text-danger">*</span></label>
                 <select name="new_seat_id" class="form-select @error('new_seat_id') is-invalid @enderror" required>
                     <option value="">Choose New Seat</option>
-                    @foreach($availableSeats as $availSeat)
+                    @foreach($targetSeats as $availSeat)
                         <option value="{{ $availSeat->id }}">{{ $availSeat->room->building }} - Room {{ $availSeat->room->room_number }} - {{ $availSeat->seat_number }} (Floor {{ $availSeat->room->floor }})</option>
                     @endforeach
                 </select>

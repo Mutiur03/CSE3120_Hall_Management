@@ -51,7 +51,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>{{ auth('student')->user()->name }}
+                            <i class="fas fa-user-circle me-1"></i>{{ auth()->user()->name }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ route('student.profile') }}"><i class="fas fa-user me-2"></i>Profile</a></li>

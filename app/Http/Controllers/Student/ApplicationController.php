@@ -2,62 +2,85 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Enums\RoomStatus;
+use App\Enums\SeatApplicationStatus;
 use App\Http\Controllers\Controller;
-use App\Models\SeatApplication;
+use App\Http\Requests\Student\StoreSeatApplicationRequest;
 use App\Models\Room;
-use Illuminate\Http\Request;
+use App\Models\SeatApplication;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ApplicationController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        $student = auth('student')->user();
-        $applications = $student->seatApplications()->latest()->paginate(10);
-        return view('student.applications.index', compact('applications'));
+        $student = auth()->user()->student;
+
+        abort_if($student === null, 404);
+
+        $applications = $student->seatApplications()
+            ->with('preferredRoom')
+            ->latest()
+            ->paginate(10);
+
+        return view('student.applications.index', compact('applications', 'student'));
     }
 
-    public function create()
+    public function create(): View|RedirectResponse
     {
-        $student = auth('student')->user();
+        $student = auth()->user()->student;
+
+        abort_if($student === null, 404);
 
         if ($student->currentAllocation) {
-            return redirect()->route('student.dashboard')
+            return redirect()
+                ->route('student.dashboard')
                 ->with('error', 'You already have an allocated seat.');
         }
 
-        $pendingApplication = $student->seatApplications()->where('status', 'pending')->first();
-        if ($pendingApplication) {
-            return redirect()->route('student.applications.index')
+        if ($student->seatApplications()->where('status', SeatApplicationStatus::Pending)->exists()) {
+            return redirect()
+                ->route('student.applications.index')
                 ->with('error', 'You already have a pending application.');
         }
 
-        $buildings = Room::select('building')->distinct()->pluck('building');
-        $rooms = Room::where('status', '!=', 'full')->get();
+        $floors = Room::query()->select('floor')->distinct()->orderBy('floor')->pluck('floor');
+        $rooms = Room::query()
+            ->where('status', RoomStatus::Active)
+            ->orderBy('floor')
+            ->orderBy('room_no')
+            ->get();
 
-        return view('student.applications.create', compact('buildings', 'rooms'));
+        return view('student.applications.create', compact('floors', 'rooms'));
     }
 
-    public function store(Request $request)
+    public function store(StoreSeatApplicationRequest $request): RedirectResponse
     {
-        $student = auth('student')->user();
+        $student = auth()->user()->student;
+
+        abort_if($student === null, 404);
 
         if ($student->currentAllocation) {
-            return redirect()->route('student.dashboard')
+            return redirect()
+                ->route('student.dashboard')
                 ->with('error', 'You already have an allocated seat.');
         }
 
-        $validated = $request->validate([
-            'preferred_building' => 'nullable|string|max:255',
-            'preferred_room' => 'nullable|string|max:255',
-            'reason' => 'nullable|string|max:1000',
+        if ($student->seatApplications()->where('status', SeatApplicationStatus::Pending)->exists()) {
+            return redirect()
+                ->route('student.applications.index')
+                ->with('error', 'You already have a pending application.');
+        }
+
+        SeatApplication::create([
+            ...$request->validated(),
+            'student_id' => $student->id,
+            'status' => SeatApplicationStatus::Pending,
         ]);
 
-        $validated['student_id'] = $student->id;
-        $validated['status'] = 'pending';
-
-        SeatApplication::create($validated);
-
-        return redirect()->route('student.applications.index')
+        return redirect()
+            ->route('student.applications.index')
             ->with('success', 'Seat application submitted successfully.');
     }
 }

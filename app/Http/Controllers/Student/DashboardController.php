@@ -2,26 +2,34 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Enums\RoomChangeRequestStatus;
+use App\Enums\SeatApplicationStatus;
 use App\Http\Controllers\Controller;
-use App\Models\SeatApplication;
-use App\Models\RoomChangeRequest;
-use App\Models\Meal;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $student = auth('student')->user();
-        $student->load(['currentAllocation.seat.room', 'seatApplications', 'roomChangeRequests', 'meals']);
+        $student = auth()->user()->student;
+
+        abort_if($student === null, 404);
+
+        $student->load(['currentAllocation.seat.room', 'seatApplications', 'roomChangeRequests']);
 
         $currentSeat = $student->currentSeat();
         $currentRoom = $student->currentRoom();
 
-        $pendingApplication = $student->seatApplications()->where('status', 'pending')->latest()->first();
-        $pendingRoomChange = $student->roomChangeRequests()->where('status', 'pending')->latest()->first();
+        $pendingApplication = $student->seatApplications()
+            ->where('status', SeatApplicationStatus::Pending)
+            ->latest()
+            ->first();
 
-        $todayMeal = Meal::where('student_id', $student->id)->where('date', today())->first();
+        $pendingRoomChange = $student->roomChangeRequests()
+            ->where('status', RoomChangeRequestStatus::Pending)
+            ->latest()
+            ->first();
+
+        $todayMeal = null;
 
         return view('student.dashboard', compact(
             'student', 'currentSeat', 'currentRoom',

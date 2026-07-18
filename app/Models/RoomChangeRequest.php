@@ -2,55 +2,61 @@
 
 namespace App\Models;
 
+use App\Enums\RoomChangeRequestStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RoomChangeRequest extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'student_id',
-        'current_room_id',
+        'current_seat_id',
         'requested_room_id',
         'reason',
         'status',
-        'admin_remarks',
-        'approved_by',
-        'approved_at',
+        'admin_comment',
+        'reviewed_by',
+        'reviewed_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'status' => 'string',
-            'approved_at' => 'datetime',
+            'status' => RoomChangeRequestStatus::class,
+            'reviewed_at' => 'datetime',
         ];
     }
 
-    public function student()
+    public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
-    public function currentRoom()
+    public function currentSeat(): BelongsTo
     {
-        return $this->belongsTo(Room::class, 'current_room_id');
+        return $this->belongsTo(Seat::class, 'current_seat_id');
     }
 
-    public function requestedRoom()
+    public function requestedRoom(): BelongsTo
     {
         return $this->belongsTo(Room::class, 'requested_room_id');
     }
 
-    public function approver()
+    public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 
     public function scopePending($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', RoomChangeRequestStatus::Pending);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === RoomChangeRequestStatus::Pending;
     }
 }

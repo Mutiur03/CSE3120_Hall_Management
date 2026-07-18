@@ -19,20 +19,25 @@
             <div class="card-header"><h5>Request Details</h5></div>
             <div class="card-body">
                 <table class="table table-borderless">
-                    <tr><th>Student</th><td>{{ $roomChange->student->name }} ({{ $roomChange->student->student_id }})</td></tr>
-                    <tr><th>Current Room</th><td>{{ $roomChange->currentRoom->room_number }} ({{ $roomChange->currentRoom->building }})</td></tr>
-                    <tr><th>Requested Room</th><td>{{ $roomChange->requestedRoom->room_number }} ({{ $roomChange->requestedRoom->building }})</td></tr>
-                    <tr><th>Reason</th><td>{{ $roomChange->reason }}</td></tr>
-                    <tr><th>Status</th><td><span class="badge bg-{{ $roomChange->status === 'pending' ? 'warning' : ($roomChange->status === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($roomChange->status) }}</span></td></tr>
+                    <tr><th>Student</th><td>{{ $roomChange->student->user->name }} ({{ $roomChange->student->roll }})</td></tr>
+                    <tr><th>Current Room</th><td>{{ $roomChange->currentSeat?->room?->room_no ?? '—' }} @if($roomChange->currentSeat?->room)(Floor {{ $roomChange->currentSeat->room->floor }})@endif</td></tr>
+                    <tr><th>Requested Room</th><td>{{ $roomChange->requestedRoom?->room_no ?? '—' }} @if($roomChange->requestedRoom)(Floor {{ $roomChange->requestedRoom->floor }})@endif</td></tr>
+                    <tr><th>Reason</th><td>{{ $roomChange->reason ?? '—' }}</td></tr>
+                    <tr><th>Status</th><td><span class="badge bg-{{ $roomChange->status->value === 'pending' ? 'warning' : ($roomChange->status->value === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($roomChange->status->value) }}</span></td></tr>
                     <tr><th>Submitted</th><td>{{ $roomChange->created_at->format('M d, Y H:i') }}</td></tr>
-                    @if($roomChange->admin_remarks)
-                    <tr><th>Admin Remarks</th><td>{{ $roomChange->admin_remarks }}</td></tr>
+                    @if($roomChange->admin_comment)
+                    <tr><th>Admin Comment</th><td>{{ $roomChange->admin_comment }}</td></tr>
                     @endif
                 </table>
             </div>
         </div>
     </div>
-    @if($roomChange->status === 'pending')
+    @if($roomChange->status->value === 'pending')
+    @php
+        $availableSeats = optional($roomChange->requestedRoom)->seats
+            ? $roomChange->requestedRoom->seats->filter(fn ($seat) => $seat->status->value === 'active' && $seat->currentAllocation === null)
+            : collect();
+    @endphp
     <div class="col-lg-6">
         <div class="card border-success">
             <div class="card-header bg-success text-white"><h5 class="mb-0"><i class="fas fa-check me-2"></i>Approve Request</h5></div>
@@ -40,11 +45,21 @@
                 <form action="{{ route('admin.room-changes.approve', $roomChange) }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label class="form-label">Remarks (optional)</label>
-                        <textarea name="admin_remarks" class="form-control" rows="3"></textarea>
+                        <label class="form-label">Target Seat <span class="text-danger">*</span></label>
+                        <select name="target_seat_id" class="form-select @error('target_seat_id') is-invalid @enderror" required>
+                            <option value="">Select a seat in the requested room</option>
+                            @foreach($availableSeats as $seat)
+                                <option value="{{ $seat->id }}">{{ $seat->seat_no }}</option>
+                            @endforeach
+                        </select>
+                        @error('target_seat_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Comment (optional)</label>
+                        <textarea name="admin_comment" class="form-control" rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn btn-success w-100" onclick="return confirm('Approve this room change request?')">
-                        <i class="fas fa-check me-1"></i>Approve & Transfer
+                        <i class="fas fa-check me-1"></i>Approve &amp; Transfer
                     </button>
                 </form>
             </div>
@@ -56,7 +71,8 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
-                        <textarea name="admin_remarks" class="form-control" rows="3" required></textarea>
+                        <textarea name="admin_comment" class="form-control @error('admin_comment') is-invalid @enderror" rows="3" required></textarea>
+                        @error('admin_comment')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <button type="submit" class="btn btn-danger w-100"><i class="fas fa-times me-1"></i>Reject Request</button>
                 </form>

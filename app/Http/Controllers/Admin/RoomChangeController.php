@@ -2,28 +2,34 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\AllocationStatus;
+use App\Enums\RoomChangeRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Models\RoomChangeRequest;
 use App\Models\Seat;
 use App\Models\SeatAllocation;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class RoomChangeController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $query = RoomChangeRequest::with(['student', 'currentRoom', 'requestedRoom']);
+        $query = RoomChangeRequest::query()
+            ->with(['student.user', 'currentSeat.room', 'requestedRoom']);
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', $request->string('status')->value());
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('student', function ($q) use ($search) {
-                $q->where('student_id', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
+            $search = $request->string('search')->value();
+            $query->whereHas('student', function ($q) use ($search): void {
+                $q->where('roll', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -32,73 +38,80 @@ class RoomChangeController extends Controller
         return view('admin.room-changes.index', compact('requests'));
     }
 
-    public function show(RoomChangeRequest $roomChange)
+    public function show(RoomChangeRequest $roomChange): View
     {
-        $roomChange->load(['student', 'currentRoom', 'requestedRoom']);
+        $roomChange->load(['student.user', 'currentSeat.room', 'requestedRoom', 'reviewer']);
+
         return view('admin.room-changes.show', compact('roomChange'));
     }
 
-    public function approve(Request $request, RoomChangeRequest $roomChange)
+    public function approve(Request $request, RoomChangeRequest $roomChange): RedirectResponse
     {
-        if ($roomChange->status !== 'pending') {
-            return redirect()->back()->with('error', 'Request is not pending.');
+        if ($roomChange->status !== RoomChangeRequestStatus::Pending) {
+            return redirect()->back()->with('error', 'This request is not pending.');
         }
 
         $validated = $request->validate([
-            'admin_remarks' => 'nullable|string',
+            'target_seat_id' => ['required', 'integer', 'exists:seats,id'],
+            'admin_comment' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        DB::transaction(function () use ($roomChange, $validated) {
-            $student = $roomChange->student;
-            $currentAllocation = $student->currentAllocation;
-            $requestedRoom = $roomChange->requestedRoom;
+        $targetSeat = Seat::query()->with('currentAllocation')->findOrFail($validated['target_seat_id']);
 
-            // Find available seat in requested room
-            $availableSeat = Seat::where('room_id', $requestedRoom->id)
-                ->where('status', 'available')
+        if ($targetSeat->room_id !== $roomChange->requested_room_id) {
+            throw ValidationException::withMessages([
+                'target_seat_id' => 'The selected seat is not in the requested room.',
+            ]);
+        }
+
+        if ($targetSeat->isOccupied()) {
+            throw ValidationException::withMessages([
+                'target_seat_id' => 'The selected seat is already occupied.',
+            ]);
+        }
+
+        DB::transaction(function () use ($roomChange, $validated): void {
+            $student = $roomChange->student;
+
+            $targetSeat = Seat::query()->lockForUpdate()->findOrFail($validated['target_seat_id']);
+
+            if (SeatAllocation::query()
+                ->where('seat_id', $targetSeat->id)
+                ->where('status', AllocationStatus::Active)
+                ->lockForUpdate()
+                ->exists()
+            ) {
+                throw ValidationException::withMessages([
+                    'target_seat_id' => 'The selected seat is already occupied.',
+                ]);
+            }
+
+            $currentAllocation = SeatAllocation::query()
+                ->where('student_id', $student->id)
+                ->where('status', AllocationStatus::Active)
+                ->lockForUpdate()
                 ->first();
 
-            if (!$availableSeat) {
-                throw new \Exception('No available seats in requested room.');
-            }
-
-            // Vacate current seat
             if ($currentAllocation) {
                 $currentAllocation->update([
-                    'status' => 'vacated',
-                    'vacate_date' => now(),
-                    'notes' => 'Room change approved',
+                    'status' => AllocationStatus::Vacated,
+                    'vacated_at' => now()->toDateString(),
                 ]);
-
-                $oldSeat = $currentAllocation->seat;
-                $oldSeat->update(['status' => 'available']);
-
-                $oldRoom = $oldSeat->room;
-                if ($oldRoom->status === 'full') {
-                    $oldRoom->update(['status' => 'available']);
-                }
             }
 
-            // Create new allocation
             SeatAllocation::create([
                 'student_id' => $student->id,
-                'seat_id' => $availableSeat->id,
-                'room_id' => $requestedRoom->id,
-                'allocation_date' => now(),
-                'status' => 'active',
+                'seat_id' => $targetSeat->id,
+                'allocated_by' => auth()->id(),
+                'allocated_at' => now()->toDateString(),
+                'status' => AllocationStatus::Active,
             ]);
 
-            $availableSeat->update(['status' => 'occupied']);
-
-            if ($requestedRoom->isFull()) {
-                $requestedRoom->update(['status' => 'full']);
-            }
-
             $roomChange->update([
-                'status' => 'approved',
-                'admin_remarks' => $validated['admin_remarks'] ?? null,
-                'approved_by' => auth()->id(),
-                'approved_at' => now(),
+                'status' => RoomChangeRequestStatus::Approved,
+                'admin_comment' => $validated['admin_comment'] ?? null,
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now(),
             ]);
         });
 
@@ -106,21 +119,21 @@ class RoomChangeController extends Controller
             ->with('success', 'Room change request approved.');
     }
 
-    public function reject(Request $request, RoomChangeRequest $roomChange)
+    public function reject(Request $request, RoomChangeRequest $roomChange): RedirectResponse
     {
-        if ($roomChange->status !== 'pending') {
-            return redirect()->back()->with('error', 'Request is not pending.');
+        if ($roomChange->status !== RoomChangeRequestStatus::Pending) {
+            return redirect()->back()->with('error', 'This request is not pending.');
         }
 
         $validated = $request->validate([
-            'admin_remarks' => 'required|string',
+            'admin_comment' => ['required', 'string', 'max:1000'],
         ]);
 
         $roomChange->update([
-            'status' => 'rejected',
-            'admin_remarks' => $validated['admin_remarks'],
-            'approved_by' => auth()->id(),
-            'approved_at' => now(),
+            'status' => RoomChangeRequestStatus::Rejected,
+            'admin_comment' => $validated['admin_comment'],
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
         ]);
 
         return redirect()->route('admin.room-changes.index')

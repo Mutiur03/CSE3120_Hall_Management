@@ -2,25 +2,24 @@
 
 namespace App\Models;
 
+use App\Enums\SeatStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
 class Seat extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'room_id',
-        'seat_number',
+        'seat_no',
         'status',
-        'notes',
     ];
 
     protected function casts(): array
     {
         return [
-            'status' => 'string',
+            'status' => SeatStatus::class,
         ];
     }
 
@@ -39,13 +38,30 @@ class Seat extends Model
         return $this->hasOne(SeatAllocation::class)->where('status', 'active')->latest();
     }
 
+    public function scopeAvailable($query)
+    {
+        return $query->where('status', SeatStatus::Active)
+            ->whereDoesntHave('currentAllocation');
+    }
+
+    public function scopeOccupied($query)
+    {
+        return $query->whereHas('currentAllocation');
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === SeatStatus::Active;
+    }
+
     public function isAvailable(): bool
     {
-        return $this->status === 'available';
+        return $this->status === SeatStatus::Active
+            && ! $this->currentAllocation()->exists();
     }
 
     public function isOccupied(): bool
     {
-        return $this->status === 'occupied';
+        return $this->currentAllocation()->exists();
     }
 }

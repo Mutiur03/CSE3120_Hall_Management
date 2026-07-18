@@ -2,30 +2,29 @@
 
 namespace App\Models;
 
+use App\Enums\AllocationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
 class SeatAllocation extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'student_id',
         'seat_id',
-        'room_id',
-        'allocation_date',
-        'vacate_date',
+        'allocated_by',
+        'allocated_at',
+        'vacated_at',
         'status',
-        'notes',
     ];
 
     protected function casts(): array
     {
         return [
-            'allocation_date' => 'date',
-            'vacate_date' => 'date',
-            'status' => 'string',
+            'allocated_at' => 'date',
+            'vacated_at' => 'date',
+            'status' => AllocationStatus::class,
         ];
     }
 
@@ -39,8 +38,13 @@ class SeatAllocation extends Model
         return $this->belongsTo(Seat::class);
     }
 
+    public function allocatedBy()
+    {
+        return $this->belongsTo(User::class, 'allocated_by');
+    }
+
     public function room()
     {
-        return $this->belongsTo(Room::class);
+        return $this->hasOneThrough(Room::class, Seat::class, 'id', 'id', 'seat_id', 'room_id');
     }
 }

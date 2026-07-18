@@ -2,92 +2,86 @@
 
 namespace App\Models;
 
+use App\Enums\StudentStatus;
+use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Student extends Authenticatable
+class Student extends Model
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    /** @use HasFactory<StudentFactory> */
+    use HasFactory;
 
+    /**
+     * @var list<string>
+     */
     protected $fillable = [
-        'student_id',
-        'name',
+        'user_id',
+        'roll',
+        'registration_no',
         'department',
-        'session',
-        'batch',
-        'gender',
-        'blood_group',
+        'academic_session',
         'phone',
-        'email',
-        'address',
-        'guardian_name',
-        'guardian_phone',
-        'photo',
         'status',
-        'password',
-        'password_changed',
     ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
-            'password_changed' => 'boolean',
-            'status' => 'string',
+            'status' => StudentStatus::class,
         ];
     }
 
-    public function getAuthIdentifierName()
+    public function user(): BelongsTo
     {
-        return 'student_id';
+        return $this->belongsTo(User::class);
     }
 
-    public function seatAllocations()
+    public function seatAllocations(): HasMany
     {
         return $this->hasMany(SeatAllocation::class);
     }
 
-    public function currentAllocation()
+    public function currentAllocation(): HasOne
     {
-        return $this->hasOne(SeatAllocation::class)->where('status', 'active')->latest();
+        return $this->hasOne(SeatAllocation::class)
+            ->where('status', 'active')
+            ->latestOfMany();
     }
 
-    public function seatApplications()
+    public function seatApplications(): HasMany
     {
         return $this->hasMany(SeatApplication::class);
     }
 
-    public function roomChangeRequests()
+    public function roomChangeRequests(): HasMany
     {
         return $this->hasMany(RoomChangeRequest::class);
     }
 
-    public function meals()
+    public function meals(): HasMany
     {
         return $this->hasMany(Meal::class);
     }
 
-    public function diningAttendances()
+    public function diningAttendances(): HasMany
     {
         return $this->hasMany(DiningAttendance::class);
     }
 
-    public function currentSeat()
+    public function currentSeat(): ?Seat
     {
-        $allocation = $this->currentAllocation;
-        return $allocation ? $allocation->seat : null;
+        return $this->currentAllocation?->seat;
     }
 
-    public function currentRoom()
+    public function currentRoom(): ?Room
     {
-        $allocation = $this->currentAllocation;
-        return $allocation ? $allocation->room : null;
+        return $this->currentAllocation?->seat?->room;
     }
 }
