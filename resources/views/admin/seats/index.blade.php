@@ -16,14 +16,6 @@
     <div class="card-body">
         <form method="GET" class="row g-3 mb-4">
             <div class="col-md-3">
-                <select name="building" class="form-select">
-                    <option value="">All Buildings</option>
-                    @foreach($buildings as $b)
-                        <option value="{{ $b }}" {{ request('building') == $b ? 'selected' : '' }}>{{ $b }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
                 <select name="floor" class="form-select">
                     <option value="">All Floors</option>
                     @foreach($floors as $f)
@@ -35,7 +27,7 @@
                 <select name="room_id" class="form-select">
                     <option value="">All Rooms</option>
                     @foreach($rooms as $r)
-                        <option value="{{ $r->id }}" {{ request('room_id') == $r->id ? 'selected' : '' }}>{{ $r->room_number }}</option>
+                        <option value="{{ $r->id }}" {{ request('room_id') == $r->id ? 'selected' : '' }}>{{ $r->room_no }}</option>
                     @endforeach
                 </select>
             </div>
@@ -44,7 +36,7 @@
                     <option value="">All Status</option>
                     <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
                     <option value="occupied" {{ request('status') == 'occupied' ? 'selected' : '' }}>Occupied</option>
-                    <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                 </select>
             </div>
             <div class="col-md-1">
@@ -55,18 +47,25 @@
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
-                    <tr><th>ID</th><th>Seat</th><th>Room</th><th>Building</th><th>Floor</th><th>Status</th><th>Student</th><th>Actions</th></tr>
+                    <tr><th>ID</th><th>Seat</th><th>Room</th><th>Floor</th><th>Status</th><th>Student</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     @forelse($seats as $seat)
                     <tr>
                         <td>{{ $seat->id }}</td>
-                        <td>{{ $seat->seat_number }}</td>
-                        <td>{{ $seat->room->room_number }}</td>
-                        <td>{{ $seat->room->building }}</td>
+                        <td>{{ $seat->seat_no }}</td>
+                        <td>{{ $seat->room->room_no }}</td>
                         <td>{{ $seat->room->floor }}</td>
-                        <td><span class="badge bg-{{ $seat->status === 'available' ? 'success' : ($seat->status === 'occupied' ? 'danger' : 'warning') }}">{{ ucfirst($seat->status) }}</span></td>
-                        <td>{{ $seat->currentAllocation?->student->name ?? '-' }}</td>
+                        <td>
+                            @if($seat->isOccupied())
+                                <span class="badge bg-danger">Occupied</span>
+                            @elseif($seat->isActive())
+                                <span class="badge bg-success">Available</span>
+                            @else
+                                <span class="badge bg-warning">Inactive</span>
+                            @endif
+                        </td>
+                        <td>{{ $seat->currentAllocation?->student->user->name ?? '-' }}</td>
                         <td>
                             @if($seat->isOccupied())
                                 <a href="{{ route('admin.seats.vacate-form', $seat) }}" class="btn btn-sm btn-warning">Vacate</a>

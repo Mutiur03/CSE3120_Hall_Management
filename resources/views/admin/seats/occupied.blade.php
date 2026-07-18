@@ -16,10 +16,10 @@
     <div class="card-body">
         <form method="GET" class="row g-3 mb-4">
             <div class="col-md-4">
-                <select name="building" class="form-select">
-                    <option value="">All Buildings</option>
-                    @foreach($buildings as $b)
-                        <option value="{{ $b }}" {{ request('building') == $b ? 'selected' : '' }}>{{ $b }}</option>
+                <select name="floor" class="form-select">
+                    <option value="">All Floors</option>
+                    @foreach($floors as $f)
+                        <option value="{{ $f }}" {{ request('floor') == $f ? 'selected' : '' }}>Floor {{ $f }}</option>
                     @endforeach
                 </select>
             </div>
@@ -30,15 +30,15 @@
 
         <div class="table-responsive">
             <table class="table table-hover">
-                <thead><tr><th>Seat</th><th>Room</th><th>Building</th><th>Student</th><th>Student ID</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Seat</th><th>Room</th><th>Floor</th><th>Student</th><th>Roll</th><th>Actions</th></tr></thead>
                 <tbody>
                     @forelse($seats as $seat)
                     <tr>
-                        <td><span class="badge bg-danger">{{ $seat->seat_number }}</span></td>
-                        <td>{{ $seat->room->room_number }}</td>
-                        <td>{{ $seat->room->building }}</td>
-                        <td>{{ $seat->currentAllocation?->student->name ?? '-' }}</td>
-                        <td>{{ $seat->currentAllocation?->student->student_id ?? '-' }}</td>
+                        <td><span class="badge bg-danger">{{ $seat->seat_no }}</span></td>
+                        <td>{{ $seat->room->room_no }}</td>
+                        <td>{{ $seat->room->floor }}</td>
+                        <td>{{ $seat->currentAllocation?->student->user->name ?? '-' }}</td>
+                        <td>{{ $seat->currentAllocation?->student->roll ?? '-' }}</td>
                         <td>
                             <a href="{{ route('admin.seats.vacate-form', $seat) }}" class="btn btn-sm btn-warning">Vacate</a>
                             <a href="{{ route('admin.seats.transfer-form', $seat) }}" class="btn btn-sm btn-info">Transfer</a>

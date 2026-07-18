@@ -21,15 +21,13 @@
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
-                    <tr><th>Room</th><th>Building</th><th>Floor</th><th>Type</th><th>Capacity</th><th>Occupied</th><th>Available</th><th>Occupancy %</th><th>Status</th></tr>
+                    <tr><th>Room</th><th>Floor</th><th>Capacity</th><th>Occupied</th><th>Available</th><th>Occupancy %</th><th>Status</th></tr>
                 </thead>
                 <tbody>
                     @foreach($rooms as $room)
                     <tr>
-                        <td>{{ $room->room_number }}</td>
-                        <td>{{ $room->building }}</td>
+                        <td>{{ $room->room_no }}</td>
                         <td>{{ $room->floor }}</td>
-                        <td>{{ ucfirst($room->room_type) }}</td>
                         <td>{{ $room->total_seats }}</td>
                         <td>{{ $room->occupied_seats }}</td>
                         <td>{{ $room->available_seats }}</td>
@@ -41,7 +39,7 @@
                                 <small>{{ $room->occupancy_percentage }}%</small>
                             </div>
                         </td>
-                        <td><span class="badge bg-{{ $room->status === 'available' ? 'success' : ($room->status === 'full' ? 'danger' : 'warning') }}">{{ ucfirst($room->status) }}</span></td>
+                        <td><span class="badge bg-{{ $room->status->value === 'active' ? 'success' : 'warning' }}">{{ ucfirst($room->status->value) }}</span></td>
                     </tr>
                     @endforeach
                 </tbody>

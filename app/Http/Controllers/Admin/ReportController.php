@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\DiningExport;
+use App\Exports\RoomOccupancyExport;
 use App\Http\Controllers\Controller;
-use App\Models\Student;
-use App\Models\Room;
-use App\Models\Seat;
-use App\Models\SeatAllocation;
-use App\Models\SeatApplication;
-use App\Models\RoomChangeRequest;
-use App\Models\Meal;
 use App\Models\DiningAttendance;
+use App\Models\Room;
+use App\Models\RoomChangeRequest;
+use App\Models\Seat;
+use App\Models\SeatApplication;
+use App\Models\Student;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\StudentsExport;
-use App\Exports\RoomOccupancyExport;
-use App\Exports\DiningExport;
 
 class ReportController extends Controller
 {
@@ -27,8 +24,8 @@ class ReportController extends Controller
         $activeStudents = Student::where('status', 'active')->count();
         $totalRooms = Room::count();
         $totalSeats = Seat::count();
-        $occupiedSeats = Seat::where('status', 'occupied')->count();
-        $availableSeats = Seat::where('status', 'available')->count();
+        $occupiedSeats = Seat::occupied()->count();
+        $availableSeats = Seat::available()->count();
         $pendingApplications = SeatApplication::where('status', 'pending')->count();
         $pendingRoomChanges = RoomChangeRequest::where('status', 'pending')->count();
 
@@ -47,16 +44,16 @@ class ReportController extends Controller
         }
 
         if ($request->filled('session')) {
-            $query->where('session', $request->session);
+            $query->where('academic_session', $request->session);
         }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $students = $query->latest()->get();
+        $students = $query->with('user')->latest()->get();
         $departments = Student::select('department')->distinct()->pluck('department');
-        $sessions = Student::select('session')->distinct()->pluck('session');
+        $sessions = Student::select('academic_session')->distinct()->pluck('academic_session');
 
         return view('admin.reports.student', compact('students', 'departments', 'sessions'));
     }
@@ -64,27 +61,30 @@ class ReportController extends Controller
     public function roomOccupancyReport(Request $request)
     {
         $rooms = Room::withCount(['seats as total_seats', 'seats as occupied_seats' => function ($query) {
-            $query->where('status', 'occupied');
+            $query->whereHas('currentAllocation');
         }])->get()->map(function ($room) {
             $room->available_seats = $room->total_seats - $room->occupied_seats;
             $room->occupancy_percentage = $room->total_seats > 0 ? round(($room->occupied_seats / $room->total_seats) * 100, 2) : 0;
+
             return $room;
         });
 
         if ($request->filled('export')) {
             if ($request->export === 'pdf') {
                 $pdf = Pdf::loadView('admin.reports.exports.room-pdf', compact('rooms'));
-                return $pdf->download('room-occupancy-report-' . now()->format('Y-m-d') . '.pdf');
+
+                return $pdf->download('room-occupancy-report-'.now()->format('Y-m-d').'.pdf');
             }
 
             if ($request->export === 'excel') {
-                return Excel::download(new RoomOccupancyExport(), 'room-occupancy-report-' . now()->format('Y-m-d') . '.xlsx');
+                return Excel::download(new RoomOccupancyExport, 'room-occupancy-report-'.now()->format('Y-m-d').'.xlsx');
             }
         }
 
         return view('admin.reports.room-occupancy', compact('rooms'));
     }
- public function diningReport(Request $request)
+
+    public function diningReport(Request $request)
     {
         $month = $request->filled('month') ? $request->month : now()->format('Y-m');
         $year = substr($month, 0, 4);
@@ -109,11 +109,12 @@ class ReportController extends Controller
         if ($request->filled('export')) {
             if ($request->export === 'pdf') {
                 $pdf = Pdf::loadView('admin.reports.exports.dining-pdf', compact('dailyStats', 'month', 'daysInMonth', 'totalBreakfast', 'totalLunch', 'totalDinner'));
-                return $pdf->download('dining-report-' . $month . '.pdf');
+
+                return $pdf->download('dining-report-'.$month.'.pdf');
             }
 
             if ($request->export === 'excel') {
-                return Excel::download(new DiningExport($month), 'dining-report-' . $month . '.xlsx');
+                return Excel::download(new DiningExport($month), 'dining-report-'.$month.'.xlsx');
             }
         }
 
@@ -127,14 +128,16 @@ class ReportController extends Controller
             'active_students' => Student::where('status', 'active')->count(),
             'total_rooms' => Room::count(),
             'total_seats' => Seat::count(),
-            'occupied_seats' => Seat::where('status', 'occupied')->count(),
-            'available_seats' => Seat::where('status', 'available')->count(),
+            'occupied_seats' => Seat::occupied()->count(),
+            'available_seats' => Seat::available()->count(),
             'pending_applications' => SeatApplication::where('status', 'pending')->count(),
             'pending_room_changes' => RoomChangeRequest::where('status', 'pending')->count(),
             'department_distribution' => Student::selectRaw('department, count(*) as count')->groupBy('department')->get(),
-            'building_occupancy' => Room::select('building')->groupBy('building')->get()->map(function ($item) {
-                $item->total = Seat::whereHas('room', fn($q) => $q->where('building', $item->building))->count();
-                $item->occupied = Seat::whereHas('room', fn($q) => $q->where('building', $item->building))->where('status', 'occupied')->count();
+            'building_occupancy' => Room::selectRaw('floor')->groupBy('floor')->orderBy('floor')->get()->map(function ($item) {
+                $item->building = 'Floor '.$item->floor;
+                $item->total = Seat::whereHas('room', fn ($q) => $q->where('floor', $item->floor))->count();
+                $item->occupied = Seat::whereHas('room', fn ($q) => $q->where('floor', $item->floor))->occupied()->count();
+
                 return $item;
             }),
         ];

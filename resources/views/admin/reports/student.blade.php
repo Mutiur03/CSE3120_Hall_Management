@@ -51,19 +51,18 @@
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
-                    <tr><th>Student ID</th><th>Name</th><th>Department</th><th>Session</th><th>Batch</th><th>Gender</th><th>Phone</th><th>Status</th></tr>
+                    <tr><th>Roll</th><th>Name</th><th>Reg. No</th><th>Department</th><th>Session</th><th>Phone</th><th>Status</th></tr>
                 </thead>
                 <tbody>
                     @foreach($students as $student)
                     <tr>
-                        <td>{{ $student->student_id }}</td>
-                        <td>{{ $student->name }}</td>
+                        <td>{{ $student->roll }}</td>
+                        <td>{{ $student->user->name }}</td>
+                        <td>{{ $student->registration_no }}</td>
                         <td>{{ $student->department }}</td>
-                        <td>{{ $student->session }}</td>
-                        <td>{{ $student->batch }}</td>
-                        <td>{{ ucfirst($student->gender) }}</td>
+                        <td>{{ $student->academic_session }}</td>
                         <td>{{ $student->phone }}</td>
-                        <td><span class="badge bg-{{ $student->status === 'active' ? 'success' : 'warning' }}">{{ ucfirst($student->status) }}</span></td>
+                        <td><span class="badge bg-{{ $student->status->value === 'active' ? 'success' : 'warning' }}">{{ ucfirst($student->status->value) }}</span></td>
                     </tr>
                     @endforeach
                 </tbody>

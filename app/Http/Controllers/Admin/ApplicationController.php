@@ -37,6 +37,13 @@ class ApplicationController extends Controller
         return view('admin.applications.index', compact('applications'));
     }
 
+    public function show(SeatApplication $application): View
+    {
+        $application->load(['student.user', 'preferredRoom', 'reviewer']);
+
+        return view('admin.applications.show', compact('application'));
+    }
+
     public function approve(ApproveSeatApplicationRequest $request, SeatApplication $application): RedirectResponse
     {
         if (! $application->isPending()) {

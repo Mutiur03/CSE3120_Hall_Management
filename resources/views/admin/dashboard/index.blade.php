@@ -113,10 +113,10 @@
                         <tbody>
                             @forelse($recentAllocations as $allocation)
                             <tr>
-                                <td>{{ $allocation->student->name }}</td>
-                                <td>{{ $allocation->room->room_number }}</td>
-                                <td>{{ $allocation->seat->seat_number }}</td>
-                                <td>{{ $allocation->allocation_date->format('M d, Y') }}</td>
+                                <td>{{ $allocation->student->user->name }}</td>
+                                <td>{{ $allocation->seat?->room?->room_no ?? '—' }}</td>
+                                <td>{{ $allocation->seat?->seat_no ?? '—' }}</td>
+                                <td>{{ $allocation->allocated_at?->format('M d, Y') ?? '—' }}</td>
                             </tr>
                             @empty
                             <tr><td colspan="4" class="text-center py-3">No recent allocations</td></tr>
@@ -138,7 +138,7 @@
                         <thead>
                             <tr>
                                 <th>Student</th>
-                                <th>Building</th>
+                                <th>Preferred Floor</th>
                                 <th>Status</th>
                                 <th>Date</th>
                             </tr>
@@ -146,9 +146,9 @@
                         <tbody>
                             @forelse($recentApplications as $app)
                             <tr>
-                                <td>{{ $app->student->name }}</td>
-                                <td>{{ $app->preferred_building ?? 'Any' }}</td>
-                                <td><span class="badge bg-{{ $app->status === 'pending' ? 'warning' : ($app->status === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($app->status) }}</span></td>
+                                <td>{{ $app->student->user->name }}</td>
+                                <td>{{ $app->preferred_floor ?? 'Any' }}</td>
+                                <td><span class="badge bg-{{ $app->status->value === 'pending' ? 'warning' : ($app->status->value === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($app->status->value) }}</span></td>
                                 <td>{{ $app->created_at->format('M d, Y') }}</td>
                             </tr>
                             @empty

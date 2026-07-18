@@ -2,30 +2,31 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\RoomChangeRequestStatus;
+use App\Enums\SeatApplicationStatus;
+use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Student;
 use App\Models\Room;
+use App\Models\RoomChangeRequest;
 use App\Models\Seat;
 use App\Models\SeatAllocation;
 use App\Models\SeatApplication;
-use App\Models\RoomChangeRequest;
-use App\Models\Meal;
+use App\Models\Student;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         $totalStudents = Student::count();
-        $activeStudents = Student::where('status', 'active')->count();
-        $inactiveStudents = Student::where('status', 'inactive')->count();
+        $activeStudents = Student::where('status', StudentStatus::Active)->count();
+        $inactiveStudents = Student::where('status', StudentStatus::Inactive)->count();
         $totalRooms = Room::count();
         $totalSeats = Seat::count();
-        $occupiedSeats = Seat::where('status', 'occupied')->count();
-        $availableSeats = Seat::where('status', 'available')->count();
-        $pendingApplications = SeatApplication::where('status', 'pending')->count();
-        $pendingRoomChanges = RoomChangeRequest::where('status', 'pending')->count();
+        $occupiedSeats = Seat::occupied()->count();
+        $availableSeats = Seat::available()->count();
+        $pendingApplications = SeatApplication::where('status', SeatApplicationStatus::Pending)->count();
+        $pendingRoomChanges = RoomChangeRequest::where('status', RoomChangeRequestStatus::Pending)->count();
 
         $occupancyPercentage = $totalSeats > 0 ? round(($occupiedSeats / $totalSeats) * 100, 2) : 0;
 
@@ -35,8 +36,8 @@ class DashboardController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
             $months[] = $month->format('M Y');
-            $allocationData[] = SeatAllocation::whereYear('allocation_date', $month->year)
-                ->whereMonth('allocation_date', $month->month)
+            $allocationData[] = SeatAllocation::whereYear('allocated_at', $month->year)
+                ->whereMonth('allocated_at', $month->month)
                 ->count();
         }
 
@@ -51,34 +52,45 @@ class DashboardController extends Controller
         $deptCounts = $departmentData->pluck('count');
 
         // Recent activities
-        $recentAllocations = SeatAllocation::with(['student', 'room'])
+        $recentAllocations = SeatAllocation::with(['student.user', 'seat.room'])
             ->latest()
             ->limit(10)
             ->get();
 
-        $recentApplications = SeatApplication::with('student')
+        $recentApplications = SeatApplication::with('student.user')
             ->latest()
             ->limit(5)
             ->get();
 
-        // Room occupancy by building
-        $buildingStats = Room::selectRaw('building, count(*) as total_rooms, sum(capacity) as total_capacity')
-            ->groupBy('building')
+        // Occupancy by floor (rooms have floors, not buildings)
+        $buildingStats = Room::selectRaw('floor, count(*) as total_rooms, sum(capacity) as total_capacity')
+            ->groupBy('floor')
+            ->orderBy('floor')
             ->get()
             ->map(function ($item) {
-                $occupied = Seat::whereHas('room', function ($q) use ($item) {
-                    $q->where('building', $item->building);
-                })->where('status', 'occupied')->count();
+                $occupied = Seat::query()
+                    ->whereHas('room', fn ($q) => $q->where('floor', $item->floor))
+                    ->occupied()
+                    ->count();
+                $available = Seat::query()
+                    ->whereHas('room', fn ($q) => $q->where('floor', $item->floor))
+                    ->available()
+                    ->count();
+
+                $item->building = 'Floor '.$item->floor;
                 $item->occupied = $occupied;
-                $item->occupancy_rate = $item->total_capacity > 0 ? round(($occupied / $item->total_capacity) * 100, 2) : 0;
+                $item->available = $available;
+                $item->occupancy_rate = $item->total_capacity > 0
+                    ? round(($occupied / $item->total_capacity) * 100, 2)
+                    : 0;
+
                 return $item;
             });
 
-        // Today's meal counts
-        $todayMeals = Meal::where('date', today())->where('meal_active', true);
-        $breakfastCount = (clone $todayMeals)->where('breakfast', true)->count();
-        $lunchCount = (clone $todayMeals)->where('lunch', true)->count();
-        $dinnerCount = (clone $todayMeals)->where('dinner', true)->count();
+        // Dining is not yet implemented (no meal tables); show zeroes.
+        $breakfastCount = 0;
+        $lunchCount = 0;
+        $dinnerCount = 0;
 
         return view('admin.dashboard.index', compact(
             'totalStudents', 'activeStudents', 'inactiveStudents',

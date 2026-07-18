@@ -16,7 +16,7 @@
     <div class="stat-card bg-primary"><div class="stat-icon"><i class="fas fa-bed"></i></div><div class="stat-info"><h3>{{ $totalSeats }}</h3><p>Total Seats</p></div></div>
     <div class="stat-card bg-danger"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-info"><h3>{{ $occupiedSeats }}</h3><p>Occupied</p></div></div>
     <div class="stat-card bg-success"><div class="stat-icon"><i class="fas fa-circle"></i></div><div class="stat-info"><h3>{{ $availableSeats }}</h3><p>Available</p></div></div>
-    <div class="stat-card bg-warning"><div class="stat-icon"><i class="fas fa-tools"></i></div><div class="stat-info"><h3>{{ $maintenanceSeats }}</h3><p>Maintenance</p></div></div>
+    <div class="stat-card bg-warning"><div class="stat-icon"><i class="fas fa-tools"></i></div><div class="stat-info"><h3>{{ $inactiveSeats }}</h3><p>Inactive</p></div></div>
 </div>
 
 <div class="card mt-4">
@@ -36,14 +36,14 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead><tr><th>Building</th><th>Total</th><th>Occupied</th><th>Available</th><th>Rate</th></tr></thead>
+                        <thead><tr><th>Floor</th><th>Total</th><th>Occupied</th><th>Available</th><th>Rate</th></tr></thead>
                         <tbody>
-                            @foreach($buildingStats as $stat)
+                            @foreach($floorStats as $stat)
                             <tr>
-                                <td>{{ $stat->building }}</td>
+                                <td>Floor {{ $stat->floor }}</td>
                                 <td>{{ $stat->total_seats }}</td>
-                                <td>{{ $stat->occupied }}</td>
-                                <td>{{ $stat->available }}</td>
+                                <td>{{ $stat->occupied_seats }}</td>
+                                <td>{{ $stat->available_seats }}</td>
                                 <td>
                                     <div class="progress" style="height: 6px;">
                                         <div class="progress-bar bg-{{ $stat->occupancy_rate > 80 ? 'danger' : 'success' }}" style="width: {{ $stat->occupancy_rate }}%"></div>
@@ -78,7 +78,7 @@ new Chart(ctx, {
         labels: {!! json_encode($floorStats->pluck('floor')->map(fn($f) => 'Floor '.$f)) !!},
         datasets: [
             { label: 'Total Seats', data: {!! json_encode($floorStats->pluck('total_seats')) !!}, backgroundColor: '#2563eb' },
-            { label: 'Occupied', data: {!! json_encode($floorStats->pluck('occupied')) !!}, backgroundColor: '#dc2626' }
+            { label: 'Occupied', data: {!! json_encode($floorStats->pluck('occupied_seats')) !!}, backgroundColor: '#dc2626' }
         ]
     },
     options: {

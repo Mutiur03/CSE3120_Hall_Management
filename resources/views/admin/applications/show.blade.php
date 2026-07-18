@@ -19,22 +19,22 @@
             <div class="card-header"><h5>Application Details</h5></div>
             <div class="card-body">
                 <table class="table table-borderless">
-                    <tr><th>Student</th><td>{{ $application->student->name }} ({{ $application->student->student_id }})</td></tr>
+                    <tr><th>Student</th><td>{{ $application->student->user->name }} ({{ $application->student->roll }})</td></tr>
                     <tr><th>Department</th><td>{{ $application->student->department }}</td></tr>
-                    <tr><th>Preferred Building</th><td>{{ $application->preferred_building ?? 'Any' }}</td></tr>
-                    <tr><th>Preferred Room</th><td>{{ $application->preferred_room ?? 'Any' }}</td></tr>
+                    <tr><th>Preferred Floor</th><td>{{ $application->preferred_floor ?? 'Any' }}</td></tr>
+                    <tr><th>Preferred Room</th><td>{{ $application->preferredRoom?->room_no ?? 'Any' }}</td></tr>
                     <tr><th>Reason</th><td>{{ $application->reason ?? 'N/A' }}</td></tr>
-                    <tr><th>Status</th><td><span class="badge bg-{{ $application->status === 'pending' ? 'warning' : ($application->status === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($application->status) }}</span></td></tr>
+                    <tr><th>Status</th><td><span class="badge bg-{{ $application->status->value === 'pending' ? 'warning' : ($application->status->value === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($application->status->value) }}</span></td></tr>
                     <tr><th>Submitted</th><td>{{ $application->created_at->format('M d, Y H:i') }}</td></tr>
-                    @if($application->admin_remarks)
-                    <tr><th>Admin Remarks</th><td>{{ $application->admin_remarks }}</td></tr>
+                    @if($application->admin_comment)
+                    <tr><th>Admin Comment</th><td>{{ $application->admin_comment }}</td></tr>
                     @endif
                 </table>
             </div>
         </div>
     </div>
 
-    @if($application->status === 'pending')
+    @if($application->status->value === 'pending')
     <div class="col-lg-6">
         <div class="card border-success">
             <div class="card-header bg-success text-white"><h5 class="mb-0"><i class="fas fa-check me-2"></i>Approve Application</h5></div>
@@ -42,19 +42,11 @@
                 <form action="{{ route('admin.applications.approve', $application) }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label class="form-label">Select Seat <span class="text-danger">*</span></label>
-                        <select name="seat_id" class="form-select" required>
-                            <option value="">Choose Available Seat</option>
-                            @foreach($availableSeats as $seat)
-                                <option value="{{ $seat->id }}">{{ $seat->room->building }} - Room {{ $seat->room->room_number }} - {{ $seat->seat_number }}</option>
-                            @endforeach
-                        </select>
+                        <label class="form-label">Comment (optional)</label>
+                        <textarea name="admin_comment" class="form-control @error('admin_comment') is-invalid @enderror" rows="2"></textarea>
+                        @error('admin_comment')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Remarks</label>
-                        <textarea name="admin_remarks" class="form-control" rows="2"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-check me-1"></i>Approve & Allocate Seat</button>
+                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-check me-1"></i>Approve Application</button>
                 </form>
             </div>
         </div>
@@ -66,7 +58,8 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
-                        <textarea name="admin_remarks" class="form-control" rows="3" required></textarea>
+                        <textarea name="admin_comment" class="form-control @error('admin_comment') is-invalid @enderror" rows="3" required></textarea>
+                        @error('admin_comment')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <button type="submit" class="btn btn-danger w-100"><i class="fas fa-times me-1"></i>Reject Application</button>
                 </form>

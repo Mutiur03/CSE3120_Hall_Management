@@ -18,13 +18,11 @@
                 @if($currentRoom && $currentSeat)
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Room Number:</strong> {{ $currentRoom->room_number }}</p>
-                            <p><strong>Building:</strong> {{ $currentRoom->building }}</p>
+                            <p><strong>Room Number:</strong> {{ $currentRoom->room_no }}</p>
                             <p><strong>Floor:</strong> {{ $currentRoom->floor }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Seat:</strong> {{ $currentSeat->seat_number }}</p>
-                            <p><strong>Room Type:</strong> {{ ucfirst($currentRoom->room_type) }}</p>
+                            <p><strong>Seat:</strong> {{ $currentSeat->seat_no }}</p>
                         </div>
                     </div>
                 @else
@@ -45,9 +43,9 @@
                     <div class="card-body">
                         @if($pendingApplication)
                             <div class="alert alert-warning mb-0">
-                                <p class="mb-1"><strong>Status:</strong> <span class="badge bg-warning">{{ ucfirst($pendingApplication->status) }}</span></p>
+                                <p class="mb-1"><strong>Status:</strong> <span class="badge bg-warning">{{ ucfirst($pendingApplication->status->value) }}</span></p>
                                 <p class="mb-1"><strong>Submitted:</strong> {{ $pendingApplication->created_at->format('M d, Y') }}</p>
-                                <p class="mb-0"><strong>Preferred Building:</strong> {{ $pendingApplication->preferred_building ?? 'Any' }}</p>
+                                <p class="mb-0"><strong>Preferred Floor:</strong> {{ $pendingApplication->preferred_floor ?? 'Any' }}</p>
                             </div>
                         @else
                             <p class="text-muted">No pending application.</p>
@@ -66,9 +64,9 @@
                     <div class="card-body">
                         @if($pendingRoomChange)
                             <div class="alert alert-info mb-0">
-                                <p class="mb-1"><strong>Status:</strong> <span class="badge bg-info">{{ ucfirst($pendingRoomChange->status) }}</span></p>
-                                <p class="mb-1"><strong>Current:</strong> {{ $pendingRoomChange->currentRoom->room_number }}</p>
-                                <p class="mb-0"><strong>Requested:</strong> {{ $pendingRoomChange->requestedRoom->room_number }}</p>
+                                <p class="mb-1"><strong>Status:</strong> <span class="badge bg-info">{{ ucfirst($pendingRoomChange->status->value) }}</span></p>
+                                <p class="mb-1"><strong>Current:</strong> {{ $pendingRoomChange->currentSeat?->room?->room_no ?? '—' }}</p>
+                                <p class="mb-0"><strong>Requested:</strong> {{ $pendingRoomChange->requestedRoom?->room_no ?? '—' }}</p>
                             </div>
                         @else
                             <p class="text-muted">No pending room change request.</p>
