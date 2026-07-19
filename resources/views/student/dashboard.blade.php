@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="dashboard-header mb-4">
-    <h2><i class="fas fa-tachometer-alt me-2"></i>Welcome, {{ $student->name }}!</h2>
-    <p class="text-muted">Student ID: {{ $student->student_id }} | Department: {{ $student->department }}</p>
+    <h1>Welcome, {{ $student->user->name }}</h1>
+    <p>Roll: {{ $student->roll }} · Department: {{ $student->department }}</p>
 </div>
 
 <div class="row">

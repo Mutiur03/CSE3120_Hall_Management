@@ -58,7 +58,7 @@
                 <tbody>
                     @forelse($meals as $meal)
                     <tr>
-                        <td>{{ $meal->student->name }}<br><small>{{ $meal->student->student_id }}</small></td>
+                        <td>{{ $meal->student->user->name }}<br><small>{{ $meal->student->roll }}</small></td>
                         <td><i class="fas fa-{{ $meal->breakfast ? 'check text-success' : 'times text-danger' }}"></i></td>
                         <td><i class="fas fa-{{ $meal->lunch ? 'check text-success' : 'times text-danger' }}"></i></td>
                         <td><i class="fas fa-{{ $meal->dinner ? 'check text-success' : 'times text-danger' }}"></i></td>

@@ -4,8 +4,8 @@
             <i class="fas fa-university"></i>
             <span>Hall MS</span>
         </a>
-        <button class="sidebar-toggle" id="sidebarToggle">
-            <i class="fas fa-bars"></i>
+        <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse sidebar">
+            <i class="fas fa-bars" aria-hidden="true"></i>
         </button>
     </div>
 
@@ -22,27 +22,23 @@
 
             <li class="nav-item">
                 <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-users" aria-hidden="true"></i>
                     <span>Students</span>
-                    @php
-                        $studentCount = App\Models\Student::where('status', 'active')->count();
-                    @endphp
-                    <span class="badge bg-success">{{ $studentCount }}</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{{ route('admin.rooms.index') }}" class="nav-link {{ request()->routeIs('admin.rooms.*') ? 'active' : '' }}">
-                    <i class="fas fa-door-open"></i>
+                    <i class="fas fa-door-open" aria-hidden="true"></i>
                     <span>Rooms</span>
                 </a>
             </li>
 
             <li class="nav-item has-submenu">
                 <a href="#" class="nav-link {{ request()->routeIs('admin.seats.*') ? 'active' : '' }}">
-                    <i class="fas fa-bed"></i>
+                    <i class="fas fa-bed" aria-hidden="true"></i>
                     <span>Seat Management</span>
-                    <i class="fas fa-chevron-right submenu-icon"></i>
+                    <i class="fas fa-chevron-right submenu-icon" aria-hidden="true"></i>
                 </a>
                 <ul class="submenu {{ request()->routeIs('admin.seats.*') ? 'show' : '' }}">
                     <li><a href="{{ route('admin.seats.index') }}" class="submenu-link {{ request()->routeIs('admin.seats.index') ? 'active' : '' }}">All Seats</a></li>
@@ -55,26 +51,26 @@
 
             <li class="nav-item">
                 <a href="{{ route('admin.applications.index') }}" class="nav-link {{ request()->routeIs('admin.applications.*') ? 'active' : '' }}">
-                    <i class="fas fa-file-alt"></i>
+                    <i class="fas fa-file-alt" aria-hidden="true"></i>
                     <span>Applications</span>
                     @php
-                        $pendingAppCount = App\Models\SeatApplication::where('status', 'pending')->count();
+                        $appCount = App\Models\SeatApplication::count();
                     @endphp
-                    @if($pendingAppCount > 0)
-                        <span class="badge bg-warning">{{ $pendingAppCount }}</span>
+                    @if($appCount > 0)
+                        <span class="badge nav-badge">{{ $appCount }}</span>
                     @endif
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{{ route('admin.room-changes.index') }}" class="nav-link {{ request()->routeIs('admin.room-changes.*') ? 'active' : '' }}">
-                    <i class="fas fa-exchange-alt"></i>
+                    <i class="fas fa-exchange-alt" aria-hidden="true"></i>
                     <span>Room Changes</span>
                     @php
-                        $pendingChangeCount = App\Models\RoomChangeRequest::where('status', 'pending')->count();
+                        $changeCount = App\Models\RoomChangeRequest::count();
                     @endphp
-                    @if($pendingChangeCount > 0)
-                        <span class="badge bg-warning">{{ $pendingChangeCount }}</span>
+                    @if($changeCount > 0)
+                        <span class="badge nav-badge">{{ $changeCount }}</span>
                     @endif
                 </a>
             </li>
@@ -115,8 +111,8 @@
         <form method="POST" action="{{ route('admin.logout') }}">
             @csrf
             <button type="submit" class="btn btn-logout">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
+                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                <span>Log Out</span>
             </button>
         </form>
     </div>

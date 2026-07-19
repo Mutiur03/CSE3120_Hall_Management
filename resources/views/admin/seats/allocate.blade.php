@@ -22,7 +22,7 @@
                 <select name="student_id" class="form-select @error('student_id') is-invalid @enderror" required>
                     <option value="">Choose Student</option>
                     @foreach($students as $student)
-                        <option value="{{ $student->id }}">{{ $student->student_id }} - {{ $student->name }} ({{ $student->department }})</option>
+                        <option value="{{ $student->id }}">{{ $student->roll }} - {{ $student->user->name }} ({{ $student->department }})</option>
                     @endforeach
                 </select>
                 @error('student_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -32,7 +32,7 @@
                 <select name="seat_id" class="form-select @error('seat_id') is-invalid @enderror" required>
                     <option value="">Choose Seat</option>
                     @foreach($seats as $seat)
-                        <option value="{{ $seat->id }}">{{ $seat->room->building }} - Room {{ $seat->room->room_number }} - {{ $seat->seat_number }} (Floor {{ $seat->room->floor }})</option>
+                        <option value="{{ $seat->id }}">Room {{ $seat->room->room_no }} - Seat {{ $seat->seat_no }} (Floor {{ $seat->room->floor }})</option>
                     @endforeach
                 </select>
                 @error('seat_id')<div class="invalid-feedback">{{ $message }}</div>@enderror

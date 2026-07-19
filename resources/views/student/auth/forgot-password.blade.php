@@ -3,14 +3,14 @@
 @section('title', 'Forgot Password | Hall Management System')
 
 @section('content')
-<div class="bg-white rounded-2xl shadow-2xl p-8">
-    <div class="text-center mb-6">
-        <h3 class="text-xl font-bold text-slate-800">Forgot Password</h3>
-        <p class="text-slate-500 text-sm mt-1">Enter your email to receive a reset link</p>
+<div class="auth-panel">
+    <div class="text-center mb-6 pb-5 border-b border-line">
+        <h1 class="auth-panel__title">Forgot Password</h1>
+        <p class="text-muted text-sm mt-1">Enter your email to receive a reset link</p>
     </div>
 
     @if (session('status'))
-        <div class="mb-4 rounded-lg bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm">
+        <div class="mb-4 rounded-md bg-success-soft border border-line text-success px-4 py-3 text-sm" role="status" aria-live="polite">
             {{ session('status') }}
         </div>
     @endif
@@ -19,29 +19,29 @@
         @csrf
 
         <div>
-            <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+            <label for="email" class="block text-sm font-medium text-ink mb-1">Email Address</label>
             <input
                 type="email"
                 name="email"
                 id="email"
                 value="{{ old('email') }}"
-                placeholder="Enter your registered email"
+                placeholder="name@example.com…"
                 required
                 autofocus
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 @error('email') border-red-500 @enderror"
+                autocomplete="username"
+                spellcheck="false"
+                class="auth-field @error('email') border-danger @enderror"
             >
             @error('email')
-                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                <p class="text-danger text-xs mt-1">{{ $message }}</p>
             @enderror
         </div>
 
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors">
-            Send Reset Link
-        </button>
+        <button type="submit" class="auth-btn">Send Reset Link</button>
     </form>
 
-    <div class="mt-4 text-center text-sm">
-        <a href="{{ route('student.login') }}" class="text-emerald-600 hover:text-emerald-700">Back to Student Login</a>
+    <div class="mt-5 text-center">
+        <a href="{{ route('student.login') }}" class="auth-link">Back to Student Login</a>
     </div>
 </div>
 @endsection

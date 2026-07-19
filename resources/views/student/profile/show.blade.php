@@ -20,7 +20,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="p-6 text-center">
-            <div class="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-blue-600 text-4xl font-semibold text-white">
+            <div class="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-full text-4xl font-semibold" style="background: var(--accent-soft, #e4ebe8); color: var(--accent, #3d524c);">
                 {{ strtoupper(substr($user->name, 0, 1)) }}
             </div>
             <h2 class="text-xl font-semibold text-slate-800">{{ $user->name }}</h2>

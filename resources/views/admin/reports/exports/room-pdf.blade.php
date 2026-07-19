@@ -7,9 +7,9 @@
         body { font-family: Arial, sans-serif; font-size: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #16a34a; color: white; }
-        h1 { color: #1e293b; }
-        .meta { color: #64748b; font-size: 11px; margin-bottom: 10px; }
+        th { background: #3d524c; color: white; }
+        h1 { color: #1e2228; }
+        .meta { color: #656b75; font-size: 11px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -17,13 +17,12 @@
     <p class="meta">Generated on: {{ now()->format('F d, Y H:i') }}</p>
     <table>
         <thead>
-            <tr><th>Room</th><th>Building</th><th>Floor</th><th>Capacity</th><th>Occupied</th><th>Available</th><th>Rate</th></tr>
+            <tr><th>Room</th><th>Floor</th><th>Capacity</th><th>Occupied</th><th>Available</th><th>Rate</th></tr>
         </thead>
         <tbody>
             @foreach($rooms as $room)
             <tr>
-                <td>{{ $room->room_number }}</td>
-                <td>{{ $room->building }}</td>
+                <td>{{ $room->room_no }}</td>
                 <td>{{ $room->floor }}</td>
                 <td>{{ $room->total_seats }}</td>
                 <td>{{ $room->occupied_seats }}</td>

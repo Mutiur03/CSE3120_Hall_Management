@@ -42,13 +42,13 @@
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
-                    <tr><th>Student</th><th>Student ID</th><th>Status</th><th>Time</th></tr>
+                    <tr><th>Student</th><th>Roll</th><th>Status</th><th>Time</th></tr>
                 </thead>
                 <tbody>
                     @forelse($attendances as $att)
                     <tr>
-                        <td>{{ $att->student->name }}</td>
-                        <td>{{ $att->student->student_id }}</td>
+                        <td>{{ $att->student->user->name }}</td>
+                        <td>{{ $att->student->roll }}</td>
                         <td><span class="badge bg-{{ $att->present ? 'success' : 'danger' }}">{{ $att->present ? 'Present' : 'Absent' }}</span></td>
                         <td>{{ $att->time ?? '-' }}</td>
                     </tr>

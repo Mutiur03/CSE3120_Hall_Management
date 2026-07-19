@@ -77,8 +77,8 @@ new Chart(ctx, {
     data: {
         labels: {!! json_encode($floorStats->pluck('floor')->map(fn($f) => 'Floor '.$f)) !!},
         datasets: [
-            { label: 'Total Seats', data: {!! json_encode($floorStats->pluck('total_seats')) !!}, backgroundColor: '#2563eb' },
-            { label: 'Occupied', data: {!! json_encode($floorStats->pluck('occupied_seats')) !!}, backgroundColor: '#dc2626' }
+            { label: 'Total Seats', data: {!! json_encode($floorStats->pluck('total_seats')) !!}, backgroundColor: '#3d524c' },
+            { label: 'Occupied', data: {!! json_encode($floorStats->pluck('occupied_seats')) !!}, backgroundColor: '#7a4545' }
         ]
     },
     options: {

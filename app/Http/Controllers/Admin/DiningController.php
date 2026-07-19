@@ -16,7 +16,7 @@ class DiningController extends Controller
     {
         $date = $request->filled('date') ? Carbon::parse($request->date) : today();
 
-        $meals = Meal::with('student')
+        $meals = Meal::with('student.user')
             ->where('date', $date)
             ->latest()
             ->paginate(50)
@@ -42,7 +42,7 @@ class DiningController extends Controller
         $date = $request->filled('date') ? Carbon::parse($request->date) : today();
         $mealType = $request->filled('meal_type') ? $request->meal_type : 'lunch';
 
-        $attendances = DiningAttendance::with('student')
+        $attendances = DiningAttendance::with('student.user')
             ->where('date', $date)
             ->where('meal_type', $mealType)
             ->latest()

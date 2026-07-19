@@ -9,7 +9,7 @@
             <div class="card-header"><h5><i class="fas fa-exchange-alt me-2"></i>Room Change Request</h5></div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <p class="mb-1"><strong>Current Room:</strong> {{ $currentRoom->room_number }} ({{ $currentRoom->building }})</p>
+                    <p class="mb-1"><strong>Current Room:</strong> {{ $currentRoom->room_no }} (Floor {{ $currentRoom->floor }})</p>
                 </div>
                 <form action="{{ route('student.room-changes.store') }}" method="POST">
                     @csrf
@@ -18,7 +18,7 @@
                         <select name="requested_room_id" class="form-select" required>
                             <option value="">Select Room</option>
                             @foreach($availableRooms as $room)
-                                <option value="{{ $room->id }}">Room {{ $room->room_number }} ({{ $room->building }}, Floor {{ $room->floor }})</option>
+                                <option value="{{ $room->id }}">Room {{ $room->room_no }} (Floor {{ $room->floor }})</option>
                             @endforeach
                         </select>
                     </div>

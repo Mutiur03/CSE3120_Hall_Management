@@ -7,9 +7,9 @@
         body { font-family: Arial, sans-serif; font-size: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #ca8a04; color: white; }
-        h1 { color: #1e293b; }
-        .meta { color: #64748b; font-size: 11px; margin-bottom: 10px; }
+        th { background: #3d524c; color: white; }
+        h1 { color: #1e2228; }
+        .meta { color: #656b75; font-size: 11px; margin-bottom: 10px; }
     </style>
 </head>
 <body>

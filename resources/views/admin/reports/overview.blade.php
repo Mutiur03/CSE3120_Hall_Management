@@ -52,7 +52,7 @@ new Chart(deptCtx, {
         labels: {!! json_encode($data['department_distribution']->pluck('department')) !!},
         datasets: [{
             data: {!! json_encode($data['department_distribution']->pluck('count')) !!},
-            backgroundColor: ['#2563eb','#16a34a','#dc2626','#ca8a04','#9333ea','#0891b2','#ea580c','#db2777']
+            backgroundColor: ['#2f3f3b','#3d524c','#5a6e68','#7a8a84','#9aa8a2','#b8c2bd','#cfd6d2','#e4ebe8']
         }]
     },
     options: { responsive: true, maintainAspectRatio: false }
@@ -64,8 +64,8 @@ new Chart(buildCtx, {
     data: {
         labels: {!! json_encode($data['building_occupancy']->pluck('building')) !!},
         datasets: [
-            { label: 'Total', data: {!! json_encode($data['building_occupancy']->pluck('total')) !!}, backgroundColor: '#2563eb' },
-            { label: 'Occupied', data: {!! json_encode($data['building_occupancy']->pluck('occupied')) !!}, backgroundColor: '#dc2626' }
+            { label: 'Total', data: {!! json_encode($data['building_occupancy']->pluck('total')) !!}, backgroundColor: '#3d524c' },
+            { label: 'Occupied', data: {!! json_encode($data['building_occupancy']->pluck('occupied')) !!}, backgroundColor: '#7a4545' }
         ]
     },
     options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }

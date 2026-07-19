@@ -7,8 +7,8 @@
 
 @section('content')
 <div class="dashboard-header">
-    <h1><i class="fas fa-tachometer-alt me-2"></i>Dashboard Overview</h1>
-    <p class="text-muted">Welcome to Hall Management System</p>
+    <h1>Dashboard</h1>
+    <p>Hall operations at a glance</p>
 </div>
 
 <div class="stats-grid">
@@ -218,10 +218,12 @@ new Chart(allocationCtx, {
         datasets: [{
             label: 'Seat Allocations',
             data: {!! json_encode($allocationData) !!},
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            borderColor: '#3d524c',
+            backgroundColor: 'rgba(61, 82, 76, 0.08)',
             fill: true,
-            tension: 0.4
+            tension: 0.3,
+            pointBackgroundColor: '#3d524c',
+            pointRadius: 3,
         }]
     },
     options: {
@@ -229,7 +231,17 @@ new Chart(allocationCtx, {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, color: '#656b75' },
+                grid: { color: 'rgba(213, 210, 204, 0.7)' },
+                border: { display: false },
+            },
+            x: {
+                ticks: { color: '#656b75' },
+                grid: { display: false },
+                border: { display: false },
+            },
         }
     }
 });
@@ -241,13 +253,19 @@ new Chart(deptCtx, {
         labels: {!! json_encode($departments) !!},
         datasets: [{
             data: {!! json_encode($deptCounts) !!},
-            backgroundColor: ['#2563eb', '#16a34a', '#dc2626', '#ca8a04', '#9333ea', '#0891b2', '#ea580c', '#db2777']
+            backgroundColor: ['#2f3f3b', '#3d524c', '#5a6e68', '#7a8a84', '#9aa8a2', '#b8c2bd']
         }]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } }
+        cutout: '68%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { boxWidth: 10, color: '#656b75', font: { size: 11 } }
+            }
+        }
     }
 });
 
@@ -257,8 +275,8 @@ new Chart(buildingCtx, {
     data: {
         labels: {!! json_encode($buildingStats->pluck('building')) !!},
         datasets: [
-            { label: 'Occupied', data: {!! json_encode($buildingStats->pluck('occupied')) !!}, backgroundColor: '#dc2626' },
-            { label: 'Available', data: {!! json_encode($buildingStats->pluck('available')) !!}, backgroundColor: '#16a34a' }
+            { label: 'Occupied', data: {!! json_encode($buildingStats->pluck('occupied')) !!}, backgroundColor: '#7a4545' },
+            { label: 'Available', data: {!! json_encode($buildingStats->pluck('available')) !!}, backgroundColor: '#3f5c4a' }
         ]
     },
     options: {

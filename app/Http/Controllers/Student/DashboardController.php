@@ -14,7 +14,7 @@ class DashboardController extends Controller
 
         abort_if($student === null, 404);
 
-        $student->load(['currentAllocation.seat.room', 'seatApplications', 'roomChangeRequests']);
+        $student->load(['user', 'currentAllocation.seat.room', 'seatApplications', 'roomChangeRequests']);
 
         $currentSeat = $student->currentSeat();
         $currentRoom = $student->currentRoom();

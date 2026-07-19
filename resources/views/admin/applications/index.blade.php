@@ -39,9 +39,18 @@
                     @forelse($applications as $app)
                     <tr>
                         <td>{{ $app->id }}</td>
-                        <td>{{ $app->student->name }}<br><small>{{ $app->student->student_id }}</small></td>
+                        <td>{{ $app->student->user->name }}<br><small>{{ $app->student->roll }}</small></td>
                         <td>{{ $app->student->department }}</td>
-                        <td>{{ $app->preferred_building ?? 'Any' }}<br>{{ $app->preferred_room ?? '' }}</td>
+                        <td>
+                            @if($app->preferred_floor)
+                                Floor {{ $app->preferred_floor }}
+                            @else
+                                Any
+                            @endif
+                            @if($app->preferredRoom)
+                                <br>Room {{ $app->preferredRoom->room_no }}
+                            @endif
+                        </td>
                         <td>{{ Str::limit($app->reason, 50) }}</td>
                         <td><span class="badge bg-{{ $app->status->value === 'pending' ? 'warning' : ($app->status->value === 'approved' ? 'success' : 'danger') }}">{{ ucfirst($app->status->value) }}</span></td>
                         <td>{{ $app->created_at->format('M d, Y') }}</td>

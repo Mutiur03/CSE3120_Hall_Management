@@ -17,10 +17,10 @@
     <div class="card-body">
         <div class="alert alert-warning">
             <h5>Seat Details</h5>
-            <p class="mb-1"><strong>Room:</strong> {{ $seat->room->room_number }} ({{ $seat->room->building }})</p>
-            <p class="mb-1"><strong>Seat:</strong> {{ $seat->seat_number }}</p>
-            <p class="mb-1"><strong>Student:</strong> {{ $seat->currentAllocation?->student->name ?? 'N/A' }}</p>
-            <p class="mb-0"><strong>Allocated Since:</strong> {{ $seat->currentAllocation?->allocation_date?->format('M d, Y') ?? 'N/A' }}</p>
+            <p class="mb-1"><strong>Room:</strong> {{ $seat->room->room_no }} (Floor {{ $seat->room->floor }})</p>
+            <p class="mb-1"><strong>Seat:</strong> {{ $seat->seat_no }}</p>
+            <p class="mb-1"><strong>Student:</strong> {{ $seat->currentAllocation?->student?->user?->name ?? 'N/A' }}</p>
+            <p class="mb-0"><strong>Allocated Since:</strong> {{ $seat->currentAllocation?->allocated_at?->format('M d, Y') ?? 'N/A' }}</p>
         </div>
 
         <form action="{{ route('admin.seats.vacate', $seat) }}" method="POST">

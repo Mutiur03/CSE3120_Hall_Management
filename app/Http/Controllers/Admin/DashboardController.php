@@ -6,6 +6,7 @@ use App\Enums\RoomChangeRequestStatus;
 use App\Enums\SeatApplicationStatus;
 use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Meal;
 use App\Models\Room;
 use App\Models\RoomChangeRequest;
 use App\Models\Seat;
@@ -87,10 +88,11 @@ class DashboardController extends Controller
                 return $item;
             });
 
-        // Dining is not yet implemented (no meal tables); show zeroes.
-        $breakfastCount = 0;
-        $lunchCount = 0;
-        $dinnerCount = 0;
+        // Today's meal count: students with meals active for today.
+        $todayMeals = Meal::query()->whereDate('date', today())->where('meal_active', true);
+        $breakfastCount = (clone $todayMeals)->where('breakfast', true)->count();
+        $lunchCount = (clone $todayMeals)->where('lunch', true)->count();
+        $dinnerCount = (clone $todayMeals)->where('dinner', true)->count();
 
         return view('admin.dashboard.index', compact(
             'totalStudents', 'activeStudents', 'inactiveStudents',
